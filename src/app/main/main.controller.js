@@ -6,8 +6,10 @@
     .controller('MainController', MainController);
 
   /** @ngInject */
-  function MainController($timeout) {
-    var vm = this;
-    vm.testMsg = 'testing 1 2 3';
+  function MainController($state) {
+    var main = this;
+    main.viewWorkflow = function(id) {
+      $state.go('workflow', { workflowId: id });
+    }
   }
 })();

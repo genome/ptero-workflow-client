@@ -47,7 +47,7 @@ function browserSyncInit(baseDir, browser) {
     port: 7000,
     browser: browser,
     ui: {
-      port: 7002
+      port: 7001
     }
   });
 }
