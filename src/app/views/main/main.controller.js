@@ -7,8 +7,8 @@
 
   /** @ngInject */
   function MainController($state) {
-    var main = this;
-    main.viewWorkflow = function(id) {
+    var vm = this;
+    vm.viewWorkflow = function(id) {
       $state.go('workflow', { workflowId: id });
     }
   }

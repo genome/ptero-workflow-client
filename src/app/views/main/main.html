@@ -1,0 +1,13 @@
+<div class="main-view">
+  <div class="row">
+    <div class="col-xs-12">
+      <form ng-submit="vm.viewWorkflow(vm.workflowId)" class="id-form">
+        <label for="workflow-id">View Detail for Workflow ID:</label>
+        <div class="input-elements">
+          <input type="text" id="workflow-id" ng-model="vm.workflowId"/>
+          <button type="submit" ng-click="vm.viewWorkflow(vm.workflowId)">View Workflow</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>

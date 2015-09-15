@@ -10,15 +10,15 @@
     $stateProvider
       .state('main', {
         url: '/',
-        templateUrl: 'app/main/main.html',
+        templateUrl: 'app/views/main/main.html',
         controller: 'MainController',
-        controllerAs: 'main'
+        controllerAs: 'vm'
       })
       .state('workflow', {
         url: '/workflow/:workflowId',
-        templateUrl: 'app/workflow/workflow.html',
+        templateUrl: 'app/views/workflow/workflow.html',
         controller: 'WorkflowController',
-        controllerAs: 'workflow'
+        controllerAs: 'vm'
       });
 
     $urlRouterProvider.otherwise('/');
