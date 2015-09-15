@@ -2,68 +2,33 @@
   'use strict';
 
   angular
-    .module('pteroWorkflowClient')
-    .factory('WorkflowResource',  WorkflowResource)
-    .factory('WorkflowService',  WorkflowService);
+    .module('pteroWorkflowClient.services')
+    .factory('Workflow',  WorkflowService);
 
   /* @ngInject */
-  function WorkflowResource($resource, $cacheFactory) {
-    var cache = $cacheFactory.get('$http');
+  function WorkflowService($q, Reports) {
+    var workflow = {};
 
-    var cacheInterceptor = function(response) {
-      cache.remove(response.config.url);
-      return response.$promise;
-    };
-
-    return $resource('/ptero/v1/workflows/:workflowId',
-      {
-        workflowId: '@workflowId'
-      },
-      {
-        // Base Gene Resources
-        query: {
-          method: 'GET',
-          isArray: true,
-          cache: cache
-        },
-        getDetails: { // get a single gene
-          url: '/ptero/v1/reports/workflow-details',
-          params: {
-
-          },
-          method: 'GET',
-          isArray: false,
-          cache: cache
-        },
-        getName: { // get a single gene's name and entrez_id
-          url: '/api/genes/:geneId',
-          params: {detailed: 'false'},
-          method: 'GET',
-          isArray: false,
-          cache: cache
-        }
-      }
-    );
-  }
-
-  /* @ngInject */
-  function WorkflowService() {
-    var someValue = '';
     var factory = {
-      save: save,
-      someValue: someValue,
-      validate: validate
+      workflow: workflow,
+      get: get
     };
+
     return factory;
 
     ////////////
 
-    function save() {
-      /* */
-    }
-
-    function validate() {
-      /* */
+    function get(workflowId) {
+      $q.all([
+        Reports.get({reportType: 'workflow-skeleton', workflow_id: workflowId}),
+        Reports.get({reportType: 'workflow-details', workflow_id: workflowId}),
+        Reports.get({reportType: 'workflow-outputs', workflow_id: workflowId}),
+        Reports.get({reportType: 'workflow-executions', workflow_id: workflowId}),
+        Reports.get({reportType: 'workflow-status', workflow_id: workflowId}),
+        Reports.get({reportType: 'workflow-submission-data', workflow_id: workflowId})
+      ]).then(function(result) {
+        console.log('Workflow Service $q.all complete.');
+      });
     }
   }
 

@@ -2,12 +2,12 @@
   'use strict';
 
   angular
-    .module('pteroWorkflowClient')
+    .module('pteroWorkflowClient.views')
     .controller('WorkflowController', WorkflowController);
 
   /** @ngInject */
-  function WorkflowController($stateParams) {
+  function WorkflowController(workflow) {
     var vm = this;
-    vm.workflowId = $stateParams.workflowId;
+    vm.workflow = workflow;
   }
 })();

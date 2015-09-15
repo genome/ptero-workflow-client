@@ -6,6 +6,9 @@
       'ngMessages',
       'ngResource',
       'ui.router',
-      'ui.bootstrap'
+      'ui.bootstrap',
+      'pteroWorkflowClient.services',
+      'pteroWorkflowClient.views'
     ]);
+
 })();

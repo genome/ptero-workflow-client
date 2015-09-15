@@ -18,7 +18,13 @@
         url: '/workflow/:workflowId',
         templateUrl: 'app/views/workflow/workflow.html',
         controller: 'WorkflowController',
-        controllerAs: 'vm'
+        controllerAs: 'vm',
+        resolve: {
+          Workflow: 'Workflow',
+          workflow: /* @ngInject */ function(Workflow, $stateParams) {
+            return Workflow.get($stateParams.workflowId);
+          }
+        }
       });
 
     $urlRouterProvider.otherwise('/');

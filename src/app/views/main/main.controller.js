@@ -2,7 +2,7 @@
   'use strict';
 
   angular
-    .module('pteroWorkflowClient')
+    .module('pteroWorkflowClient.views')
     .controller('MainController', MainController);
 
   /** @ngInject */

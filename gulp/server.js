@@ -33,11 +33,11 @@ function browserSyncInit(baseDir, browser) {
    *
    * For more details and option, https://github.com/chimurai/http-proxy-middleware/blob/v0.0.5/README.md
    */
-  server.middleware = proxyMiddleware('/ptero', {
+  server.middleware = proxyMiddleware('/api', {
     target: 'http://192.168.20.20:7000',
     proxyHost: 'localhost',
     pathRewrite: {
-      '^/ptero' : '/'      // rewrite paths
+      '^/api' : '/'      // rewrite paths
     }
   });
 
