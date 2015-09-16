@@ -6,7 +6,7 @@
     .factory('Workflow',  WorkflowService);
 
   /* @ngInject */
-  function WorkflowService($q, _, Reports) {
+  function WorkflowService($q, $log, _, Reports) {
     var workflow = {};
 
     var factory = {
@@ -29,7 +29,7 @@
         submissionData: Reports.get({reportType: 'workflow-submission-data', workflow_id: workflowId})
       })
         .then(function(result) {
-          console.log('Workflow Service $q.all complete.');
+          $log.info('Workflow Service $q.all complete.');
           deferred.resolve(parseWorkflow(result));
         })
         .catch(function(error) {
@@ -44,16 +44,14 @@
       var skeleton = result.skeleton;
       var executions = indexExecutions(result.executions.executions);
       var rootExecution = executions.tasks[skeleton.rootTaskId][0];
-      var workflow = {
-        info: {
-          name: skeleton.name,
-          status: skeleton.status,
-          timeStamp: new Date(getTimestampForStatusAndHistory(skeleton.status, rootExecution.statusHistory)).toISOString()
-        },
-        tree: [
-
-        ]
-      };
+      var workflow = [{
+        id: 1,
+        type: 'workflow',
+        name: skeleton.name,
+        status: skeleton.status,
+        timeStamp: new Date(getTimestampForStatusAndHistory(skeleton.status, rootExecution.statusHistory)).toISOString(),
+        nodes: parseTasks(skeleton.tasks, executions, 0, null)
+      }];
 
       return workflow;
     }
@@ -81,6 +79,71 @@
       });
 
       return indexedExecutions;
+    }
+
+    function parseTasks(tasks, executions, nestingLevel, color) {
+      var taskNodes = [];
+      var sortedTaskKeys = getSortedTaskKeys(tasks);
+      sortedTaskKeys.forEach(function (taskKey, index, array) {
+        var task = tasks[taskKey];
+        var taskExecutions = executions.tasks[task.id];
+        taskExecutions.forEach(function(taskExecution, index, array) {
+          if (taskExecution.parentColor == color) {
+            taskNodes = getStatusInfoRowsForTaskExecution(taskKey, task, taskExecution, executions, nestingLevel);
+          }
+        });
+      });
+      return taskNodes;
+    }
+
+    function getStatusInfoRowsForTaskExecution(name, task, taskExecution, executions, nestingLevel) {
+      var taskNodes = [];
+      taskNodes.push({
+        name: name,
+        status: taskExecution.status,
+        timestamp: getTimestampForStatusAndHistory(taskExecution.status, taskExecution.statusHistory),
+        nestingLevel: nestingLevel,
+        type: 'task',
+        methods: parseMethods(task, taskExecution, executions, nestingLevel + 1)
+      });
+      return taskNodes;
+    }
+
+    function parseMethods(task, execution, indexedExecutions, nestingLevel) {
+      return _.map(task.methods, function(method) {
+        $log.info(['parsing method: ', JSON.stringify(method)].join(' '));
+        return getStatusInfoRowsForMethod(method, execution.color, indexedExecutions, nestingLevel);
+      });
+    }
+
+    function getStatusInfoRowsForMethod(method, color, indexedExecutions, nestingLevel) {
+      var statusInfo = {},
+        executions = indexedExecutions.methods[method.id];
+//      $log.info(['getting status info for method: ', JSON.stringify(method)].join(' '));
+      executions
+        .filter(function (e) {
+          return e.parentColor == color;
+        })
+        .forEach(function (execution, index, executions) {
+          if (statusInfo === undefined) { var statusInfo = {}; }
+          statusInfo = {
+            name: method.name,
+            status: execution.status,
+            timestamp: getTimestampForStatusAndHistory(execution.status, execution.statusHistory),
+            nestingLevel: nestingLevel,
+            type: method.service,
+          };
+          if (method.service == "workflow") {
+            statusInfo.nodes = parseTasks(method.parameters.tasks, indexedExecutions, nestingLevel + 1, execution.color);
+          }
+        });
+      return statusInfo;
+    }
+
+    function getSortedTaskKeys(tasks) {
+      return Object.keys(tasks).sort(function(a, b) {
+        return tasks[a].topologicalIndex - tasks[b].topologicalIndex;
+      });
     }
 
     function getTimestampForStatusAndHistory(status, history) {
