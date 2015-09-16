@@ -42,8 +42,8 @@
 
     function parseWorkflow(result) {
       var skeleton = result.skeleton;
-      var executions = indexExecutions(result.executions.executions);
-      var rootExecution = executions.tasks[skeleton.rootTaskId][0];
+      var executions = parseExecutions(result.executions.executions);
+      var rootExecution = _.find(executions.tasks, 'id', skeleton.rootTaskId);
       var workflow = [{
         id: 0,
         type: 'workflow',
@@ -56,17 +56,59 @@
       return workflow;
     }
 
-    function parseTasks(tasks, executions, nestingLevel, color) {
-      var taskNodes = [];
-      var sortedTaskKeys = getSortedTaskKeys(tasks);
-      sortedTaskKeys.forEach(function (taskKey, index, array) {
-        var task = tasks[taskKey];
-        var taskExecutions = executions.tasks[task.id];
-        taskExecutions.forEach(function(taskExecution, index, array) {
-          if (taskExecution.parentColor == color) {
-            taskNodes = getStatusInfoRowsForTaskExecution(taskKey, task, taskExecution, executions, nestingLevel, index);
-          }
+    function parseTasks(tasks, executions, nestingLevel, parentColor) {
+      tasks = _.sortBy(tasks, 'topologicalIndex');
+      var taskNodes = _.map(tasks, function(task) {
+        // for each task node, return an array of task execution status objects.
+        var taskExecutions = _.select(executions.tasks, { id: task.id, parentColor: parentColor });
+        return _.map(taskExecutions, function(execution, index, array) {
+          return getTaskNodes(execution, task, nestingLevel, index)
         });
+      });
+      return taskNodes;
+      //return _.chain(tasks)
+      //  .sort(function(taskA, taskB) { taskA.topologicalIndex = taskB.topologicalIndex })
+      //  .map(function(task) {
+      //    $log.info('parsing task ' + task.id);
+      //    $log.info(task);
+      //
+      //    return _.compact(_.map(_.filter(executions.tasks, 'id', task.id), function(taskExecution) {
+      //      $log.info('getting status info for task execution: ' + taskExecution.id);
+      //      $log.info(taskExecution);
+      //      if(taskExecution.parentColor == color) {
+      //        return getTaskNodes()
+      //        return taskExecution;
+      //      } else { return null; }
+      //    }))
+      //  })
+      //  .value();
+      //
+      //
+      //
+      //var taskNodes = [];
+      //var sortedTaskKeys = getSortedTaskKeys(tasks);
+      //sortedTaskKeys.forEach(function (taskKey, index, array) {
+      //  var task = tasks[taskKey];
+      //  var taskExecutions = executions.tasks[task.id];
+      //  taskExecutions.forEach(function(taskExecution, index, array) {
+      //    if (taskExecution.parentColor == color) {
+      //      taskNodes = getStatusInfoRowsForTaskExecution(taskKey, task, taskExecution, executions, nestingLevel, index);
+      //    }
+      //  });
+      //});
+      //return taskNodes;
+    }
+
+    function getTaskNodes(execution, task, nestingLevel, index) {
+      var taskNodes = [];
+      taskNodes.push({
+        id: String(String(nestingLevel) + String(index)),
+        name: name,
+        status: execution.status,
+        timestamp: getTimestampForStatusAndHistory(execution.status, execution.statusHistory),
+        nestingLevel: nestingLevel,
+        type: 'task',
+        methods: ['methods']
       });
       return taskNodes;
     }
@@ -131,7 +173,7 @@
       return statuses[0].timestamp;
     }
 
-    function indexExecutions(executions) {
+    function parseExecutions(executions) {
       var indexedExecutions = { methods: [], tasks: [] };
       _.each(executions, function(execution) {
         if(_.has(execution, 'taskId')) {
