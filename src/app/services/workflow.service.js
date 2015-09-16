@@ -6,7 +6,7 @@
     .factory('Workflow',  WorkflowService);
 
   /* @ngInject */
-  function WorkflowService($q, Reports) {
+  function WorkflowService($q, _, Reports) {
     var workflow = {};
 
     var factory = {
@@ -19,17 +19,29 @@
     ////////////
 
     function get(workflowId) {
-      return $q.all({
+      var deferred = $q.defer();
+      $q.all({
         skeleton: Reports.get({reportType: 'workflow-skeleton', workflow_id: workflowId}),
         details: Reports.get({reportType: 'workflow-details', workflow_id: workflowId}),
         outputs: Reports.get({reportType: 'workflow-outputs', workflow_id: workflowId}),
         executions: Reports.get({reportType: 'workflow-executions', workflow_id: workflowId}),
         status: Reports.get({reportType: 'workflow-status', workflow_id: workflowId}),
         submissionData: Reports.get({reportType: 'workflow-submission-data', workflow_id: workflowId})
-      }).then(function(result) {
-        console.log('Workflow Service $q.all complete.');
-        return result;
-      });
+      })
+        .then(function(result) {
+          console.log('Workflow Service $q.all complete.');
+          deferred.resolve(result);
+        })
+        .catch(function(error) {
+          console.error('Error fetching details for workflow.');
+          deferred.reject('Error fetching details for workflow.');
+        });
+
+      return deferred.promise;
+    }
+
+    function parseWorkflow(skeleton, executions) {
+
     }
   }
 
