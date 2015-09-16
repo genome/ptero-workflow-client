@@ -45,7 +45,7 @@
       var executions = indexExecutions(result.executions.executions);
       var rootExecution = executions.tasks[skeleton.rootTaskId][0];
       var workflow = [{
-        id: 1,
+        id: 0,
         type: 'workflow',
         name: skeleton.name,
         status: skeleton.status,
@@ -56,31 +56,6 @@
       return workflow;
     }
 
-    function indexExecutions(executions) {
-      var indexedExecutions = { methods: {}, tasks: {} }
-
-      executions.forEach(function (element, index, array) {
-        var executionType;
-        var id;
-        if (element.hasOwnProperty("taskId")) {
-          executionType = 'tasks';
-          id = element.taskId;
-        } else if (element.hasOwnProperty("methodId")) {
-          executionType = 'methods';
-          id = element.methodId;
-        } else {
-          console.error("Unknown key!");
-        }
-
-        if (!indexedExecutions[executionType].hasOwnProperty(id)) {
-          indexedExecutions[executionType][id] = []
-        }
-        indexedExecutions[executionType][id].push(element);
-      });
-
-      return indexedExecutions;
-    }
-
     function parseTasks(tasks, executions, nestingLevel, color) {
       var taskNodes = [];
       var sortedTaskKeys = getSortedTaskKeys(tasks);
@@ -89,16 +64,17 @@
         var taskExecutions = executions.tasks[task.id];
         taskExecutions.forEach(function(taskExecution, index, array) {
           if (taskExecution.parentColor == color) {
-            taskNodes = getStatusInfoRowsForTaskExecution(taskKey, task, taskExecution, executions, nestingLevel);
+            taskNodes = getStatusInfoRowsForTaskExecution(taskKey, task, taskExecution, executions, nestingLevel, index);
           }
         });
       });
       return taskNodes;
     }
 
-    function getStatusInfoRowsForTaskExecution(name, task, taskExecution, executions, nestingLevel) {
+    function getStatusInfoRowsForTaskExecution(name, task, taskExecution, executions, nestingLevel, index) {
       var taskNodes = [];
       taskNodes.push({
+        id: String(String(nestingLevel) + String(index)),
         name: name,
         status: taskExecution.status,
         timestamp: getTimestampForStatusAndHistory(taskExecution.status, taskExecution.statusHistory),
@@ -110,10 +86,11 @@
     }
 
     function parseMethods(task, execution, indexedExecutions, nestingLevel) {
-      return _.map(task.methods, function(method) {
+      var methods = _.map(task.methods, function(method) {
         $log.info(['parsing method: ', JSON.stringify(method)].join(' '));
         return getStatusInfoRowsForMethod(method, execution.color, indexedExecutions, nestingLevel);
       });
+      return methods;
     }
 
     function getStatusInfoRowsForMethod(method, color, indexedExecutions, nestingLevel) {
@@ -141,6 +118,7 @@
     }
 
     function getSortedTaskKeys(tasks) {
+      $log.info('sorting keys for tasks: '+ JSON.stringify(tasks));
       return Object.keys(tasks).sort(function(a, b) {
         return tasks[a].topologicalIndex - tasks[b].topologicalIndex;
       });
@@ -151,6 +129,31 @@
         return statusUpdate.status == status;
       });
       return statuses[0].timestamp;
+    }
+
+    function indexExecutions(executions) {
+      var indexedExecutions = { methods: {}, tasks: {} }
+
+      executions.forEach(function (element, index, array) {
+        var executionType;
+        var id;
+        if (element.hasOwnProperty("taskId")) {
+          executionType = 'tasks';
+          id = element.taskId;
+        } else if (element.hasOwnProperty("methodId")) {
+          executionType = 'methods';
+          id = element.methodId;
+        } else {
+          console.error("Unknown key!");
+        }
+
+        if (!indexedExecutions[executionType].hasOwnProperty(id)) {
+          indexedExecutions[executionType][id] = []
+        }
+        indexedExecutions[executionType][id].push(element);
+      });
+
+      return indexedExecutions;
     }
 
   }
