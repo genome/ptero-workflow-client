@@ -132,25 +132,18 @@
     }
 
     function indexExecutions(executions) {
-      var indexedExecutions = { methods: {}, tasks: {} }
-
-      executions.forEach(function (element, index, array) {
-        var executionType;
-        var id;
-        if (element.hasOwnProperty("taskId")) {
-          executionType = 'tasks';
-          id = element.taskId;
-        } else if (element.hasOwnProperty("methodId")) {
-          executionType = 'methods';
-          id = element.methodId;
-        } else {
-          console.error("Unknown key!");
+      var indexedExecutions = { methods: [], tasks: [] };
+      _.each(executions, function(execution) {
+        if(_.has(execution, 'taskId')) {
+          execution.type = 'task';
+          execution.id = execution.taskId;
+          indexedExecutions.tasks.push(execution)}
+        else if(_.has(execution, 'methodId')) {
+          execution.type = 'method';
+          execution.id = execution.methodId;
+          indexedExecutions.methods.push(execution)
         }
-
-        if (!indexedExecutions[executionType].hasOwnProperty(id)) {
-          indexedExecutions[executionType][id] = []
-        }
-        indexedExecutions[executionType][id].push(element);
+        else { console.error('indexExecutions encountered unknown execution type "' + JSON.stringify(execution)); }
       });
 
       return indexedExecutions;
