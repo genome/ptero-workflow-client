@@ -60,8 +60,9 @@
     function getTaskNodes(tasks, executions, depth, parentColor) {
       tasks = _.sortBy(tasks, 'topologicalIndex');
       var taskNodes = _.map(tasks, function(task) {
+        var taskExecutions = _.select(executions.tasks, { id: task.id, parentColor: parentColor });
         // for each task node, return an array of task execution status objects.
-        function getTask(task, depth, execution, index, tasks) {
+        function iterator(task, depth, execution, index, tasks) {
           return {
             id: execution.id,
             depth: depth,
@@ -72,10 +73,10 @@
             nodes: getMethodNodes(task, tasks, depth, execution, index)
           };
         }
-        var getTaskIteratee = _.curry(getTask);
-        getTaskIteratee(task, depth);
-        var taskExecutions = _.select(executions.tasks, { id: task.id, parentColor: parentColor });
-        return _.map(taskExecutions, getTaskIteratee());
+        var getNodes = _.partial(iterator, task, depth);
+        return _.map(taskExecutions, function(execution, index, tasks) {
+          return getNodes(execution, index, tasks);
+        });
       });
       return taskNodes;
     }
