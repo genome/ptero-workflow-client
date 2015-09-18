@@ -60,7 +60,7 @@
     function parseResult(result) {
       updateUrl = result.executions.updateUrl;
       parseSkeleton(result.skeleton);
-      parseExecutions(result.executions);
+      linkExecutions(parseExecutions(result.executions));
       return workflow;
     }
 
@@ -80,7 +80,9 @@
         name: skeleton.name,
         status: skeleton.status,
         started: skeleton.begins,
-        tasks: parseTasks(skeleton.tasks)
+        tasks: parseTasks(skeleton.tasks),
+        executions: [],
+        methods: []
       };
     }
 
@@ -117,17 +119,60 @@
       _.each(exec.executions, function (execution) {
         $log.debug('------- parsing execution');
         $log.debug(execution);
-        execution.type = getType(execution);
 
-        executions.push(execution);
+        executions.push({
+          id: execution.id,
+          parentId: getParentId(execution),
+          parentType: getParentType(execution),
+          status: execution.status,
+          statusHistory: execution.statusHistory,
+          begins: execution.begins,
+          color: execution.color,
+          colors: execution.colors,
+          parentColor: execution.parentColor,
+          detailsUrl: execution.detailsUrl,
+          childWorkflowUrls: _.has(execution, 'childWorkflowUrls') ? execution.childWorkflowUrls : [],
+          details: _.has(execution, 'data') ? { data: execution.data, name: execution.name, inputs: execution.inputs } : {}
+        });
 
-        function getType(execution) {
-          var type;
+        function getParentId(execution) {
+          if (_.has(execution, 'taskId')) { return execution.taskId }
+          else if (_.has(execution, 'methodId')) { return execution.methodId }
+          else { console.error('Could not set parentId for unknown execution type.'); return null; }
+        }
+
+        function getParentType(execution) {
           if (_.has(execution, 'taskId')) { return 'task' }
           else if (_.has(execution, 'methodId')) { return 'method' }
-          else { console.error('parseExecutions received unknown execution type.'); return null; }
+          else { console.error('Could not set parentType for unknown execution type.'); return null; }
         }
       });
+      return executions;
+    }
+
+    function linkExecutions(exec) {
+      _.each(exec, function (execution){
+        if(execution.parentId === workflow.rootTaskId && execution.parentType === 'task') {
+          workflow.executions.push(execution);
+        } else {
+          $log.debug('found non-workflow execution -----');
+          $log.debug(execution);
+        }
+      });
+
+      //for my $hashref (@{$execution_hashrefs}) {
+      //  my $execution = Ptero::Concrete::Workflow::Execution->new($hashref);
+      //
+      //  if ($execution->{parent_id} == $self->{root_task_id} && $execution->{parent_type} eq 'task') {
+      //      $self->{executions}{$execution->{color}} = $execution
+      //  } else {
+      //    my $parent_index = sprintf("%s_index", $execution->{parent_type});
+      //    my $parent = $self->{$parent_index}{$execution->{parent_id}};
+      //    next unless $parent;
+      //      $parent->{executions}->{$execution->{color}} = $execution;
+      //  }
+      //
+      //}
     }
   }
 })();
