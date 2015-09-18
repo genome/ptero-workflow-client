@@ -6,8 +6,9 @@
     .controller('WorkflowController', WorkflowController);
 
   /** @ngInject */
-  function WorkflowController(workflow) {
+  function WorkflowController(workflow, executions) {
     var vm = this;
     vm.workflow = workflow;
+    vm.executions = executions;
   }
 })();

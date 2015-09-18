@@ -23,6 +23,9 @@
           Workflow: 'Workflow',
           workflow: /* @ngInject */ function(Workflow, $stateParams) {
             return Workflow.get($stateParams.workflowId);
+          },
+          executions: /* @ngInject */ function(Workflow) {
+            return Workflow.getExecutions();
           }
         }
       });
