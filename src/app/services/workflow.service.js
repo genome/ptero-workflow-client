@@ -198,6 +198,7 @@
         begins: exec.begins,
         color: exec.color,
         colors: exec.colors,
+        parallelIndexes: getParallelIndexes(exec),
         parentColor: exec.parentColor,
         detailsUrl: exec.detailsUrl,
         childWorkflowUrls: _.has(exec, 'childWorkflowUrls') ? exec.childWorkflowUrls : [],
@@ -239,9 +240,6 @@
 
       function getTimeStarted(e) {
         console.log('getTimeStarted called.');
-        //my $start_time = $self->timestamp_for('running');
-        //$start_time = $self->timestamp_for('errored') unless $start_time;
-        //$start_time = $self->timestamp_for('new') unless $start_time;
         if(getTimestamp('running', e.statusHistory)) { return getTimestamp('running', e.statusHistory); }
         else if(getTimestamp('errored', e.statusHistory)) { return getTimestamp('errored', e.statusHistory); }
         else { return getTimestamp('new', e.statusHistory); }
@@ -258,6 +256,45 @@
 
       function getDuration(e) {
         return moment.duration(moment(getTimeEnded(e)).diff(moment(getTimeStarted(e)))).asMilliseconds();
+      }
+
+      function getParallelIndexes(e) {
+        // subtract begins array from color array, with the execption of the first 0 index
+        return _.map(_.rest(e.colors), function(color, index) {
+          return color - e.begins[index+1];
+        });
+    //    sub parallel_indexes {
+    //      my $self = shift;
+    //# Here, we explicitly neglect the 0th index because
+    //# top level dags cannot be made parallel-by
+    //      return map {$self->{colors}->[$_] - $self->{begins}->[$_]}
+    //      (1..scalar(@{$self->{colors}})-1);
+    //    }
+
+        var bub = {
+          "id": 139,
+          "name": 12,
+          "parentId": 134,
+          "isTerminal": true,
+          "isSuccess": true,
+          "isAbnormal": false,
+          "isRunning": false,
+          "begins": [
+          0,
+          1,
+          3
+        ],
+          "color": 4,
+          "colors": [
+          0,
+          1,
+          4
+        ],
+          "parentColor": 1,
+          "detailsUrl": "http://localhost/v1/executions/139",
+          "childWorkflowUrls": [],
+          "details": {}
+        }
       }
     }
 
