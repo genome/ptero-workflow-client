@@ -1,9 +1,19 @@
 <div class="workflow-view">
   <div class="row">
     <div class="col-xs-6">
+      <h1>Workflow</h1>
+      <ul>
+        <li ng-repeat="execution in vm.report">
+          {{ execution.id }} | {{ execution.parentType }}
+        </li>
+      </ul>
+      <pre ng-bind="vm.report|json"></pre>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-6">
       <h2>Workflow</h2>
 
-      <p ng-bind="vm.workflowId">workflow Id</p>
       <pre ng-bind="vm.workflow|json"></pre>
     </div>
     <div class="col-xs-6">
@@ -12,24 +22,6 @@
       <pre ng-bind="vm.executions|json"></pre>
     </div>
   </div>
-  <script type="text/ng-template" id="nodes_renderer.html">
-    <div ui-tree-handle class="tree-node tree-node-content">
-      <a class="btn btn-success btn-xs" ng-if="node.nodes && node.nodes.length > 0" data-nodrag ng-click="toggle(this)"><span
-        class="glyphicon"
-        ng-class="{
-          'glyphicon-chevron-right': collapsed,
-          'glyphicon-chevron-down': !collapsed
-        }"></span></a>
-      {{node.name}}
-      <a class="pull-right btn btn-danger btn-xs" data-nodrag ng-click="remove(this)"><span
-        class="glyphicon glyphicon-remove"></span></a>
-      <a class="pull-right btn btn-primary btn-xs" data-nodrag ng-click="newSubItem(this)" style="margin-right: 8px;"><span
-        class="glyphicon glyphicon-plus"></span></a>
-    </div>
-    <ol ui-tree-nodes="" ng-model="node.nodes" ng-class="{hidden: collapsed}">
-      <li ng-repeat="node in node.nodes" ui-tree-node ng-include="'nodes_renderer.html'">
-      </li>
-    </ol>
-  </script>
+
 </div>
 
