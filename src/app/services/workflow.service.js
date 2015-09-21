@@ -3,10 +3,11 @@
 
   angular
     .module('pteroWorkflowClient.services')
+    .constant('TERMINAL_STATUSES', ['errored', 'failed', 'succeeded', 'canceled'])
     .factory('Workflow',  WorkflowService);
 
   /* @ngInject */
-  function WorkflowService($q, $log, _, Reports) {
+  function WorkflowService($q, $log, _, TERMINAL_STATUSES, Reports) {
     // PUBLIC ATTRIBUTES
     ////////////
     var workflow = {};
@@ -185,8 +186,14 @@
         name: name,
         parentId: getParentId(exec),
         parentType: getParentType(exec),
+        timeStarted: getTimeStarted(exec),
+        timeEnded: getTimeEnded(exec),
         status: exec.status,
         statusHistory: exec.statusHistory,
+        isTerminal: isTerminal(exec),
+        isSuccess: isSuccess(exec),
+        isAbnormal: isAbnormal(exec),
+        isRunning: isRunning(exec),
         begins: exec.begins,
         color: exec.color,
         colors: exec.colors,
@@ -195,6 +202,11 @@
         childWorkflowUrls: _.has(exec, 'childWorkflowUrls') ? exec.childWorkflowUrls : [],
         details: _.has(exec, 'data') ? { data: exec.data, name: exec.name, inputs: exec.inputs } : {}
       };
+
+      function getTimestamp(status, statusHistory) {
+        var ts = _.find(statusHistory, { status: status });
+        return ts != undefined ? ts.timestamp : false;
+      }
 
       function getParentId(execution) {
         if (_.has(execution, 'taskId')) { return execution.taskId }
@@ -206,6 +218,41 @@
         if (_.has(execution, 'taskId')) { return 'task' }
         else if (_.has(execution, 'methodId')) { return 'method' }
         else { console.error('Could not set parentType for unknown execution type.'); return null; }
+      }
+
+      function isTerminal(e) {
+        return _.contains(TERMINAL_STATUSES, e.status);
+      }
+
+      function isSuccess(e) {
+        return e.status === 'succeeded';
+      }
+
+      function isAbnormal(e) {
+        return isTerminal(e) && !isSuccess(e);
+      }
+
+      function isRunning(e) {
+        return e.status === 'running';
+      }
+
+      function getTimeStarted(e) {
+        console.log('getTimeStarted called.');
+        //my $start_time = $self->timestamp_for('running');
+        //$start_time = $self->timestamp_for('errored') unless $start_time;
+        //$start_time = $self->timestamp_for('new') unless $start_time;
+        if(getTimestamp('running', e.statusHistory)) { return getTimestamp('running', e.statusHistory); }
+        else if(getTimestamp('errored', e.statusHistory)) { return getTimestamp('errored', e.statusHistory); }
+        else { return getTimestamp('new', e.statusHistory); }
+      }
+
+      function getTimeEnded(e) {
+        console.log('getTimeStarted called.');
+        if(isTerminal(e)){
+          return getTimestamp(e.status, e.statusHistory)
+        } else {
+          return new Date();
+        }
       }
     }
 
