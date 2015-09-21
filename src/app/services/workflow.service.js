@@ -7,7 +7,7 @@
     .factory('Workflow',  WorkflowService);
 
   /* @ngInject */
-  function WorkflowService($q, $log, _, TERMINAL_STATUSES, Reports) {
+  function WorkflowService($q, $log, _, moment, TERMINAL_STATUSES, Reports) {
     // PUBLIC ATTRIBUTES
     ////////////
     var workflow = {};
@@ -188,6 +188,7 @@
         parentType: getParentType(exec),
         timeStarted: getTimeStarted(exec),
         timeEnded: getTimeEnded(exec),
+        duration: getDuration(exec),
         status: exec.status,
         statusHistory: exec.statusHistory,
         isTerminal: isTerminal(exec),
@@ -208,15 +209,15 @@
         return ts != undefined ? ts.timestamp : false;
       }
 
-      function getParentId(execution) {
-        if (_.has(execution, 'taskId')) { return execution.taskId }
-        else if (_.has(execution, 'methodId')) { return execution.methodId }
+      function getParentId(e) {
+        if (_.has(e, 'taskId')) { return e.taskId }
+        else if (_.has(e, 'methodId')) { return e.methodId }
         else { console.error('Could not set parentId for unknown execution type.'); return null; }
       }
 
-      function getParentType(execution) {
-        if (_.has(execution, 'taskId')) { return 'task' }
-        else if (_.has(execution, 'methodId')) { return 'method' }
+      function getParentType(e) {
+        if (_.has(e, 'taskId')) { return 'task' }
+        else if (_.has(e, 'methodId')) { return 'method' }
         else { console.error('Could not set parentType for unknown execution type.'); return null; }
       }
 
@@ -253,6 +254,10 @@
         } else {
           return new Date();
         }
+      }
+
+      function getDuration(e) {
+        return moment.duration(moment(getTimeEnded(e)).diff(moment(getTimeStarted(e)))).asMilliseconds();
       }
     }
 
