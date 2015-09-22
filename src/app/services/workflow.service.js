@@ -101,8 +101,14 @@
         id: task.id,
         name: taskName,
         parallelBy: task.parallelBy,
-        topologicalIndex: task.topologicalIndex
+        topologicalIndex: task.topologicalIndex,
+        executions: []
       }
+    }
+
+    function getExecutionsWithParentColor(task, color) {
+
+
     }
 
     // corresponds to Ptero::Concrete::Workflow::Method->new()
@@ -141,8 +147,8 @@
       }
     }
 
-    function createExecutions(exec) {
-      _.each(exec.executions, function (exec, name, execs) { // corresponds to Ptero::Concrete::Workflow::Execution->new()
+    function createExecutions(exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
+      _.each(exec.executions, function (exec, name, execs) {
         var execution = newExecution(exec, name);
         $log.debug('------ Execution.parentType: ' + execution.parentType);
 
@@ -183,7 +189,7 @@
       });
     }
 
-    function newExecution(exec, name) {
+    function newExecution(exec, name) { // corresponds to Ptero::Concrete::Workflow::Execution->new()
       return {
         id: exec.id,
         name: name,
