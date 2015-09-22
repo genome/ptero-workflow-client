@@ -32,7 +32,6 @@
           timeStart: execution.timeStarted,
           duration: execution.duration,
           tasks: tasks
-          //tasks: tasksReport(_.sortBy(workflow.tasks, 'topologicalIndex'), 0, 0)
         }
       } else {
         return {
@@ -45,7 +44,7 @@
     }
 
     function taskReport(color, parallelBy, task) {
-      var execution = _.find(vm.executions, { id: task.id, color: color } );
+      var execution = _.find(task.executions, { color: color } );
       var parallelInfo;
 
       if(parallelBy !== undefined && _.has(execution, 'parallelIndexes')) {
@@ -54,14 +53,13 @@
         parallelInfo = "[parallel by: " + task.parallelBy + "]";
       }
 
-      var childExecutions = _.select(vm.executions, { parentId: task.id, color: color });
+      var childTasks = [];
+      var childExecutions = _.select(task.executions, { parentId: task.id, parentColor: color });
 
-      //if(childExecutions !== undefined) {
-      //  var tasks = [];
-      //  _.each(childExecutions, function(childExecution) {
-      //    tasks.push(taskReport(childExecution.color, 1, childExecution))
-      //  })
-      //}
+      _.each(childExecutions, function(exec) {
+        var childReport = taskReport(exec.color, 1, exec);
+        childTasks.push(childReport);
+      });
 
       if(execution !== undefined) {
         return {
@@ -72,7 +70,7 @@
           duration: execution.duration,
           parallelInfo: parallelInfo,
           methods: methodsReport(task.methods, color),
-          //tasks: tasks
+          tasks: childTasks
         }
       } else {
         return {
