@@ -10,9 +10,8 @@
   function WorkflowService($q, $log, _, moment, TERMINAL_STATUSES, Reports) {
     // PUBLIC ATTRIBUTES
     ////////////
-    var workflow = {};
+    var workflows = [];
     var executions = [];
-    var updateUrl = '';
 
     // PUBLIC FUNCTIONS
     ////////////
@@ -22,16 +21,15 @@
         skeleton: Reports.get({reportType: 'workflow-skeleton', workflow_id: workflowId}),
         // details: Reports.get({reportType: 'workflow-details', workflow_id: workflowId}),
         //outputs: Reports.get({reportType: 'workflow-outputs', workflow_id: workflowId}),
-        executions: Reports.get({reportType: 'workflow-executions', workflow_id: workflowId}),
-        //status: Reports.get({reportType: 'workflow-status', workflow_id: workflowId}),
+        executions: Reports.get({reportType: 'workflow-executions', workflow_id: workflowId})
+        //,status: Reports.get({reportType: 'workflow-status', workflow_id: workflowId}),
         //submissionData: Reports.get({reportType: 'workflow-submission-data', workflow_id: workflowId})
       })
         .then(function(result) {
-          $log.info('Workflow Service $q.all complete.');
           deferred.resolve(parseResult(result));
         })
         .catch(function(error) {
-          console.error('Error fetching details for workflow.');
+          $log.error('Error fetching details for workflow.');
           deferred.reject('Error fetching details for workflow.');
         });
 
@@ -50,9 +48,8 @@
     // FACTORY MODULE
     ////////////
     var factory = {
-      workflow: workflow,
+      workflows: workflows,
       executions: executions,
-      updateUrl: updateUrl,
 
       get: get,
       getExecutions: getExecutions
@@ -64,20 +61,13 @@
     //////////
 
     function parseResult(result) {
-      updateUrl = result.executions.updateUrl;
-      createWorkflow(result.skeleton);
-      registerComponents(workflow.tasks);
-      createExecutions(result.executions);
+      var workflow = newWorkflow(result.skeleton, result.executions);
+      workflow = registerComponents(workflow);
+      workflows.push(createExecutions(workflow, result.executions));
       return workflow;
     }
 
-    function createWorkflow(skeleton) { // corresponds to Ptero::Concrete::Workflow->new()
-      //$log.debug('- parsing skeleton');
-      //$log.debug(skeleton);
-      workflow = newWorkflow(skeleton);
-    }
-
-    function newWorkflow(skeleton) {
+    function newWorkflow(skeleton, executions) {
       return {
         id: skeleton.id,
         rootTaskId: skeleton.rootTaskId,
@@ -102,12 +92,23 @@
         name: taskName,
         parallelBy: task.parallelBy,
         topologicalIndex: task.topologicalIndex,
-        executions: []
+        executions: getExecutionsWithParentColor(task, task.color),
+        methods: getTaskMethods(task)
+      };
+
+      function getTaskMethods(task) {
+        return _.map(task.methods, function(method) {
+          return method;
+        })
       }
-    }
 
-    function getExecutionsWithParentColor(task, color) {
+      function getExecutionsWithParentColor(task, color) {
+        return [];
+      }
 
+      function getMethodClass(method) {
+
+      }
 
     }
 
@@ -126,31 +127,33 @@
       });
     }
 
-    // corresponds with [Entity]->register_with_workflow()
-    // TODO: remove if unecessary (since we're just using arrays on workflow, and they've already been generated in newTask)
-    function registerComponents(tasks) {
-      _.each(tasks, function(task) {
+    //// corresponds with [Entity]->register_with_workflow()
+    //// TODO: remove if unecessary (since we're just using arrays on workflow, and they've already been generated in newTask)
+    function registerComponents(workflow) {
+      _.each(workflow.tasks, function(task) {
+        $log.debug('-------registering COMPONENTS------');
         registerTask(task);
       });
 
       function registerTask(task) {
-        //$log.debug('registering task :' + task.name);
-        //$log.debug(task);
+        $log.debug('registering task :' + task.name);
+        $log.debug(task);
         _.each(task.methods, function(method){
           registerMethod(method);
         });
       }
 
       function registerMethod(method) {
-        //$log.debug('registering method:' + method.name);
-        //$log.debug(method);
+        $log.debug('registering method:' + method.name);
+        $log.debug(method);
       }
+      return workflow;
     }
 
-    function createExecutions(exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
+    function createExecutions(workflow, exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
       _.each(exec.executions, function (exec, name, execs) {
         var execution = newExecution(exec, name);
-        $log.debug('------ Execution.parentType: ' + execution.parentType);
+        // $log.debug('------ Execution.parentType: ' + execution.parentType);
 
         if(execution.parentId === workflow.rootTaskId && execution.parentType === 'task') {
           // this is a root execution so drop it into this.executions
@@ -168,14 +171,16 @@
           }
 
           if(parent !== undefined) {
-            $log.debug('found parent for execution');
-            $log.debug(execution);
+            //$log.debug('found parent for execution');
+            //$log.debug(execution);
             parent.executions.push(execution);
             executions.push(execution);
           } else {
             executions.push(execution);
           }
         }
+
+        return workflow;
 
         //if ($execution->{parent_id} == $self->{root_task_id} && $execution->{parent_type} eq 'task') {
         //  $self->{executions}{$execution->{color}} = $execution
@@ -248,14 +253,12 @@
       }
 
       function getTimeStarted(e) {
-        console.log('getTimeStarted called.');
         if(getTimestamp('running', e.statusHistory)) { return getTimestamp('running', e.statusHistory); }
         else if(getTimestamp('errored', e.statusHistory)) { return getTimestamp('errored', e.statusHistory); }
         else { return getTimestamp('new', e.statusHistory); }
       }
 
       function getTimeEnded(e) {
-        console.log('getTimeStarted called.');
         if(isTerminal(e)){
           return getTimestamp(e.status, e.statusHistory)
         } else {
