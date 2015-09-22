@@ -75,8 +75,9 @@
         status: skeleton.status,
         started: skeleton.begins,
         tasks: _.map(skeleton.tasks, newTask), // create root workflow tasks
-        methods: _.flatten(_.map(skeleton.tasks, getMethods)),
-        executions: []
+        executions: [],
+        taskIndex: [],
+        methodIndex: []
       };
     }
 
@@ -92,39 +93,50 @@
         name: taskName,
         parallelBy: task.parallelBy,
         topologicalIndex: task.topologicalIndex,
-        executions: getExecutionsWithParentColor(task, task.color),
-        methods: getTaskMethods(task)
+        methods: getTaskMethods(task),
+        executions: getExecutionsWithParentColor(task, task.color)
       };
 
       function getTaskMethods(task) {
+        var parseMethod = {
+          'job': newMethod,
+          'workflow': newDag,
+          'workflow-block': newMethod,
+          'workflow-converge': newMethod
+        };
         return _.map(task.methods, function(method) {
-          return method;
+          return parseMethod[method.service](method);
         })
       }
 
       function getExecutionsWithParentColor(task, color) {
         return [];
       }
-
-      function getMethodClass(method) {
-
-      }
-
     }
 
     // corresponds to Ptero::Concrete::Workflow::Method->new()
-    function getMethods(task, index, tasks) {
-      //$log.debug('----- parsing method: ' + method.name);
-      //$log.debug(method);
-      return _.map(task.methods, function (method) {
-        return {
-          id: method.id,
-          name: method.name,
-          service: method.service,
-          serviceUrl: method.serviceUrl ? method.serviceUrl : null,
-          executions: []
-        };
-      });
+    function newMethod(method) {
+      $log.debug('----- parsing method: ' + method.name);
+      $log.debug(method);
+      return {
+        id: method.id,
+        name: method.name,
+        service: method.service,
+        serviceUrl: method.serviceUrl ? method.serviceUrl : null, // only job methods have serviceUrls
+        executions: []
+      };
+    }
+
+    function newDag(dag) {
+      $log.debug('----- parsing dag: ' + dag.name);
+      $log.debug(dag);
+      return {
+        id: dag.id,
+        name: dag.name,
+        service: dag.service,
+        executions: [],
+        tasks: _.map(dag.parameters.tasks, newTask)
+      };
     }
 
     //// corresponds with [Entity]->register_with_workflow()
