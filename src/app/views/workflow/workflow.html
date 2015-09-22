@@ -9,6 +9,15 @@
       </ul>
       <pre ng-bind="vm.report|json"></pre>
     </div>
+    <div class="col-xs-6">
+      <h1>Abnormal</h1>
+      <ul>
+        <li ng-repeat="execution in vm.abnormal">
+          {{ execution.id }} | {{ execution.parentType }}
+        </li>
+      </ul>
+      <pre ng-bind="vm.abnormal|json"></pre>
+    </div>
   </div>
   <div class="row">
     <div class="col-xs-6">

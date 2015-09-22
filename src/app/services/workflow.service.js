@@ -259,42 +259,9 @@
       }
 
       function getParallelIndexes(e) {
-        // subtract begins array from color array, with the execption of the first 0 index
         return _.map(_.rest(e.colors), function(color, index) {
           return color - e.begins[index+1];
         });
-    //    sub parallel_indexes {
-    //      my $self = shift;
-    //# Here, we explicitly neglect the 0th index because
-    //# top level dags cannot be made parallel-by
-    //      return map {$self->{colors}->[$_] - $self->{begins}->[$_]}
-    //      (1..scalar(@{$self->{colors}})-1);
-    //    }
-
-        var bub = {
-          "id": 139,
-          "name": 12,
-          "parentId": 134,
-          "isTerminal": true,
-          "isSuccess": true,
-          "isAbnormal": false,
-          "isRunning": false,
-          "begins": [
-          0,
-          1,
-          3
-        ],
-          "color": 4,
-          "colors": [
-          0,
-          1,
-          4
-        ],
-          "parentColor": 1,
-          "detailsUrl": "http://localhost/v1/executions/139",
-          "childWorkflowUrls": [],
-          "details": {}
-        }
       }
     }
 
