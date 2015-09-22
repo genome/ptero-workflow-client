@@ -65,16 +65,20 @@
 
     function parseResult(result) {
       updateUrl = result.executions.updateUrl;
-      newWorkflow(result.skeleton);
+      createWorkflow(result.skeleton);
       registerComponents(workflow.tasks);
       createExecutions(result.executions);
       return workflow;
     }
 
-    function newWorkflow(skeleton) { // corresponds to Ptero::Concrete::Workflow->new()
+    function createWorkflow(skeleton) { // corresponds to Ptero::Concrete::Workflow->new()
       //$log.debug('- parsing skeleton');
       //$log.debug(skeleton);
-      workflow = {
+      workflow = newWorkflow(skeleton);
+    }
+
+    function newWorkflow(skeleton) {
+      return {
         id: skeleton.id,
         rootTaskId: skeleton.rootTaskId,
         name: skeleton.name,
@@ -97,8 +101,7 @@
         id: task.id,
         name: taskName,
         parallelBy: task.parallelBy,
-        topologicalIndex: task.topologicalIndex,
-        executions: []
+        topologicalIndex: task.topologicalIndex
       }
     }
 
