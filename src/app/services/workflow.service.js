@@ -10,7 +10,7 @@
   function WorkflowService($q, $log, _, moment, TERMINAL_STATUSES, Reports) {
     // PUBLIC ATTRIBUTES
     ////////////
-    var workflows = [];
+    var workflow = {};
     var executions = [];
 
     // PUBLIC FUNCTIONS
@@ -48,7 +48,7 @@
     // FACTORY MODULE
     ////////////
     var factory = {
-      workflows: workflows,
+      workflow: workflow,
       executions: executions,
 
       get: get,
@@ -61,9 +61,9 @@
     //////////
 
     function parseResult(result) {
-      var workflow = newWorkflow(result.skeleton, result.executions);
+      workflow = newWorkflow(result.skeleton, result.executions);
       workflow = registerComponents(workflow);
-      workflows.push(createExecutions(workflow, result.executions));
+      createExecutions(workflow, result.executions);
       return workflow;
     }
 
@@ -150,6 +150,7 @@
       function registerTask(task) {
         $log.debug('registering task :' + task.name);
         $log.debug(task);
+        workflow.taskIndex.push(task);
         _.each(task.methods, function(method){
           registerMethod(method);
         });
@@ -158,6 +159,7 @@
       function registerMethod(method) {
         $log.debug('registering method:' + method.name);
         $log.debug(method);
+        workflow.methodIndex.push(method);
       }
       return workflow;
     }
@@ -174,19 +176,19 @@
           var parent;
 
           if (execution.parentType === 'method') {
-            parent = _.find(workflow.methods, { id: execution.parentId });
+            parent = _.find(workflow.methodIndex, { id: execution.parentId });
           } else if (execution.parentType === 'task') {
-            parent = _.find(workflow.methods, { id: execution.parentId });
+            parent = _.find(workflow.taskIndex, { id: execution.parentId });
           } else {
             console.error('createExecutions() received execution with unknown parentType: ' + execution.parentType);
             return;
           }
 
           if(parent !== undefined) {
-            //$log.debug('found parent for execution');
-            //$log.debug(execution);
+            $log.debug('found parent for execution');
+            $log.debug(execution);
             parent.executions.push(execution);
-            executions.push(execution);
+            //executions.push(execution);
           } else {
             executions.push(execution);
           }
