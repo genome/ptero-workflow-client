@@ -60,30 +60,42 @@
     // PRIVATE FUNCTIONS
     //////////
 
+    // Ptero::Proxy::Workflow->_concrete_workflow()
     function parseResult(result) {
-      workflow = newWorkflow(result.skeleton, result.executions);
-      workflow = registerComponents(workflow);
-      createExecutions(workflow, result.executions);
+      workflow = newWorkflow(result.skeleton);
+      //createExecutions(result.executions);
       return workflow;
     }
 
-    function newWorkflow(skeleton, executions) {
-      return {
-        id: skeleton.id,
-        rootTaskId: skeleton.rootTaskId,
-        name: skeleton.name,
-        status: skeleton.status,
-        started: skeleton.begins,
-        tasks: _.map(skeleton.tasks, newTask), // create root workflow tasks
-        executions: [],
-        taskIndex: [],
-        methodIndex: []
+    // Ptero::Concrete::Workflow->new()
+    function newWorkflow(sk) {
+      var wf = {
+        id: sk.id,
+        rootTaskId: sk.rootTaskId,
+        name: sk.name,
+        status: sk.status,
+        started: sk.begins,
+        methodIndex: {},
+        taskIndex: {},
+        tasks: _.map(sk.tasks, newTask)
       };
+
+      // REGISTER COMPONENTS
+
+      // Ptero::Concrete::Workflow::Task->register_with_workflow()
+      _.each(wf.tasks, function(task) {
+        wf.taskIndex[task.id] = task;
+        // Ptero::Concrete::Workflow::Method->register_with_workflow()
+        _.each(task.methods, function(method){
+          wf.methodIndex[method.id] = task;
+        });
+      });
+
+      return wf;
     }
 
-    //
     // corresponds to Ptero::Concrete::Workflow::Task->new()
-    function newTask(task, taskName, tasks) {
+    function newTask(task, taskName) {
       //$log.debug('--- creating Task: ' + taskName);
       //$log.debug(task);
       // get each task's methods
@@ -114,6 +126,11 @@
       }
     }
 
+    // corresponds to Ptero::Concrete::Workflow->register_components()
+    function registerComponents(workflow) {
+      return workflow;
+    }
+
     // corresponds to Ptero::Concrete::Workflow::Method->new()
     function newMethod(method) {
       $log.debug('----- parsing method: ' + method.name);
@@ -137,31 +154,6 @@
         executions: [],
         tasks: _.map(dag.parameters.tasks, newTask)
       };
-    }
-
-    //// corresponds with [Entity]->register_with_workflow()
-    //// TODO: remove if unecessary (since we're just using arrays on workflow, and they've already been generated in newTask)
-    function registerComponents(workflow) {
-      _.each(workflow.tasks, function(task) {
-        $log.debug('-------registering COMPONENTS------');
-        registerTask(task);
-      });
-
-      function registerTask(task) {
-        $log.debug('registering task :' + task.name);
-        $log.debug(task);
-        workflow.taskIndex.push(task);
-        _.each(task.methods, function(method){
-          registerMethod(method);
-        });
-      }
-
-      function registerMethod(method) {
-        $log.debug('registering method:' + method.name);
-        $log.debug(method);
-        workflow.methodIndex.push(method);
-      }
-      return workflow;
     }
 
     function createExecutions(workflow, exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
