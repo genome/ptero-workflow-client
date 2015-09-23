@@ -63,7 +63,7 @@
     // Ptero::Proxy::Workflow->_concrete_workflow()
     function parseResult(result) {
       workflow = newWorkflow(result.skeleton);
-      //createExecutions(result.executions);
+      createExecutions(result.executions);
       return workflow;
     }
 
@@ -77,7 +77,8 @@
         started: sk.begins,
         methodIndex: {},
         taskIndex: {},
-        tasks: _.map(sk.tasks, newTask)
+        tasks: _.map(sk.tasks, newTask),
+        executions: {}
       };
 
       // REGISTER WORKFLOW COMPONENTS (Ptero::Concrete::Workflow->register_components()
@@ -150,22 +151,21 @@
 
     }
 
-
-    function createExecutions(workflow, exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
+    function createExecutions(exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
       _.each(exec.executions, function (exec, name, execs) {
         var execution = newExecution(exec, name);
         // $log.debug('------ Execution.parentType: ' + execution.parentType);
 
         if(execution.parentId === workflow.rootTaskId && execution.parentType === 'task') {
           // this is a root execution so drop it into this.executions
-          workflow.executions.push(execution);
+          workflow.executions[execution.color] = execution;
         } else {
+          // sub-task or method execution, find parent and assign
           var parent;
-
           if (execution.parentType === 'method') {
-            parent = _.find(workflow.methodIndex, { id: execution.parentId });
+            parent = workflow.methodIndex[execution.parentId];
           } else if (execution.parentType === 'task') {
-            parent = _.find(workflow.taskIndex, { id: execution.parentId });
+            parent = workflow.taskIndex[execution.parentId];
           } else {
             console.error('createExecutions() received execution with unknown parentType: ' + execution.parentType);
             return;
@@ -174,24 +174,11 @@
           if(parent !== undefined) {
             $log.debug('found parent for execution');
             $log.debug(execution);
-            parent.executions.push(execution);
-            //executions.push(execution);
+            parent.executions[execution.color] = execution;
           } else {
             executions.push(execution);
           }
         }
-
-        return workflow;
-
-        //if ($execution->{parent_id} == $self->{root_task_id} && $execution->{parent_type} eq 'task') {
-        //  $self->{executions}{$execution->{color}} = $execution
-        //} else {
-        //  my $parent_index = sprintf("%s_index", $execution->{parent_type});
-        //  my $parent = $self->{$parent_index}{$execution->{parent_id}};
-        //  next unless $parent;
-        //  $parent->{executions}->{$execution->{color}} = $execution;
-        //}
-
       });
     }
 
