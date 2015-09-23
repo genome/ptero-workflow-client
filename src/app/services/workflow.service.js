@@ -80,7 +80,7 @@
         tasks: _.map(sk.tasks, newTask)
       };
 
-      // REGISTER COMPONENTS
+      // REGISTER WORKFLOW COMPONENTS (Ptero::Concrete::Workflow->register_components()
 
       // Ptero::Concrete::Workflow::Task->register_with_workflow()
       _.each(wf.tasks, function(task) {
@@ -94,67 +94,62 @@
       return wf;
     }
 
-    // corresponds to Ptero::Concrete::Workflow::Task->new()
-    function newTask(task, taskName) {
+    // Ptero::Concrete::Workflow::Task->new()
+    function newTask(task, name) {
       //$log.debug('--- creating Task: ' + taskName);
       //$log.debug(task);
       // get each task's methods
 
       return {
         id: task.id,
-        name: taskName,
+        name: name,
         parallelBy: task.parallelBy,
         topologicalIndex: task.topologicalIndex,
         methods: getTaskMethods(task),
-        executions: getExecutionsWithParentColor(task, task.color)
+        executions: {}
       };
 
       function getTaskMethods(task) {
+
         var parseMethod = {
           'job': newMethod,
           'workflow': newDag,
           'workflow-block': newMethod,
           'workflow-converge': newMethod
         };
+
         return _.map(task.methods, function(method) {
           return parseMethod[method.service](method);
-        })
+        });
+
+        // Ptero::Concrete::Workflow::Method->new()
+        function newMethod(method) {
+          $log.debug('----- parsing method: ' + method.name);
+          $log.debug(method);
+          return {
+            id: method.id,
+            name: method.name,
+            service: method.service,
+            serviceUrl: method.serviceUrl ? method.serviceUrl : null, // only job methods have serviceUrls
+            executions: {}
+          };
+        }
+        // corresponds to Ptero::Concrete::Workflow::DAG->new()
+        function newDag(dag) {
+          $log.debug('----- parsing dag: ' + dag.name);
+          $log.debug(dag);
+          return {
+            id: dag.id,
+            name: dag.name,
+            service: dag.service,
+            tasks: _.map(dag.parameters.tasks, newTask),
+            executions: {}
+          };
+        }
       }
 
-      function getExecutionsWithParentColor(task, color) {
-        return [];
-      }
     }
 
-    // corresponds to Ptero::Concrete::Workflow->register_components()
-    function registerComponents(workflow) {
-      return workflow;
-    }
-
-    // corresponds to Ptero::Concrete::Workflow::Method->new()
-    function newMethod(method) {
-      $log.debug('----- parsing method: ' + method.name);
-      $log.debug(method);
-      return {
-        id: method.id,
-        name: method.name,
-        service: method.service,
-        serviceUrl: method.serviceUrl ? method.serviceUrl : null, // only job methods have serviceUrls
-        executions: []
-      };
-    }
-
-    function newDag(dag) {
-      $log.debug('----- parsing dag: ' + dag.name);
-      $log.debug(dag);
-      return {
-        id: dag.id,
-        name: dag.name,
-        service: dag.service,
-        executions: [],
-        tasks: _.map(dag.parameters.tasks, newTask)
-      };
-    }
 
     function createExecutions(workflow, exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
       _.each(exec.executions, function (exec, name, execs) {
