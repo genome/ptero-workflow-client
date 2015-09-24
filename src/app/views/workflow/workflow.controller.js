@@ -64,22 +64,19 @@
         methods.push(reportOnMethod(method, color));
       });
 
-      //_.each(additionalColors(task, color), function(execution, index, executions) {
-      //  reportOnTask(task, execution.color, 1);
-      //});
       var tasks = [];
-      tasks = _.map(_.filter(task.executions, 'parentColor', color), function(exec) {
+      tasks = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
         return reportOnTask(task, exec.color, 1);
       });
 
       var parallelByInfo;
-      if(!_.isUndefined(parallelBy) && parallelBy !== 0) {
+
+      if(parallelBy) {
         parallelByInfo = '[' + execution.parallelIndexes.join(',') + ']';
-      } else if(!_.isUndefined(task.parallelBy) && task.parallelBy !== 0) {
+      } else if(task.parallelBy) {
         parallelByInfo = '[parallel-by: ' + task.parallelBy + ']';
       }
 
-      // TODO: report on child executions
       if(_.isUndefined(execution)) {
         return {
           type: 'task',
