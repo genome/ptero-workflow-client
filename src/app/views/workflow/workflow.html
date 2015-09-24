@@ -37,7 +37,7 @@
   <!-- workflow -->
   <script type="text/ng-template" id="workflow_render.html">
     <div >
-      Workflow: {{workflow.name}} {{ workflow.id }}
+      Workflow {{ workflow.id }}: {{workflow.name}}
     </div>
     <ol>
       <li ng-repeat="task in workflow.tasks" ui-tree-node ng-include="'workflow_task_render.html'">
@@ -48,7 +48,7 @@
   <!-- workflow task -->
   <script type="text/ng-template" id="workflow_task_render.html">
     <div>
-      Task: {{ task.name}} {{ task.id }} <span ng-bind="task.parallelByInfo"></span>
+      Task {{ task.id }}: {{ task.name }} <span ng-bind="task.parallelByInfo"></span>
     </div>
     <ol>
       <li ng-repeat="method in task.methods" ui-tree-node ng-include="'workflow_method_render.html'">
@@ -63,7 +63,7 @@
   <!-- workflow method -->
   <script type="text/ng-template" id="workflow_method_render.html">
     <div>
-      Method: {{ method.service }} {{ method.name }} {{ method.id }}
+      Method {{ method.id }}: {{ method.service }} {{ method.name }}
     </div>
     <ol>
       <li ng-repeat="task in method.tasks" ng-include="'workflow_task_render.html'">
