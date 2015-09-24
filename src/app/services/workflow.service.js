@@ -26,7 +26,8 @@
         //submissionData: Reports.get({reportType: 'workflow-submission-data', workflow_id: workflowId})
       })
         .then(function(result) {
-          deferred.resolve(parseResult(result));
+          workflow = parseResult(result);
+          deferred.resolve(workflow);
         })
         .catch(function(error) {
           $log.error('Error fetching details for workflow.');
@@ -62,9 +63,9 @@
 
     // Ptero::Proxy::Workflow->_concrete_workflow()
     function parseResult(result) {
-      workflow = newWorkflow(result.skeleton);
-      createExecutions(result.executions);
-      return workflow;
+      var wf = newWorkflow(result.skeleton);
+      createExecutions(result.executions, wf);
+      return wf;
     }
 
     // Ptero::Concrete::Workflow->new()
@@ -74,7 +75,6 @@
         rootTaskId: sk.rootTaskId,
         name: sk.name,
         status: sk.status,
-        started: sk.begins,
         methodIndex: {},
         taskIndex: {},
         tasks: _.map(sk.tasks, newTask),
@@ -83,12 +83,13 @@
 
       // REGISTER WORKFLOW COMPONENTS (Ptero::Concrete::Workflow->register_components()
 
+      /// TODO: create separate 'register' function and recurse into sub-tasks and sub-methods
       // Ptero::Concrete::Workflow::Task->register_with_workflow()
       _.each(wf.tasks, function(task) {
         wf.taskIndex[task.id] = task;
         // Ptero::Concrete::Workflow::Method->register_with_workflow()
         _.each(task.methods, function(method){
-          wf.methodIndex[method.id] = task;
+          wf.methodIndex[method.id] = method;
         });
       });
 
@@ -151,28 +152,28 @@
 
     }
 
-    function createExecutions(exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
+    function createExecutions(exec, wf) { // corresponds to Ptero::Concrete::Workflow->create_executions()
       _.each(exec.executions, function (exec, name, execs) {
         var execution = newExecution(exec, name);
         // $log.debug('------ Execution.parentType: ' + execution.parentType);
 
-        if(execution.parentId === workflow.rootTaskId && execution.parentType === 'task') {
+        if(execution.parentId === wf.rootTaskId && execution.parentType === 'task') {
           // this is a root execution so drop it into this.executions
-          workflow.executions[execution.color] = execution;
+          wf.executions[execution.color] = execution;
         } else {
           // sub-task or method execution, find parent and assign
           var parent;
           if (execution.parentType === 'method') {
-            parent = workflow.methodIndex[execution.parentId];
+            parent = wf.methodIndex[execution.parentId];
           } else if (execution.parentType === 'task') {
-            parent = workflow.taskIndex[execution.parentId];
+            parent = wf.taskIndex[execution.parentId];
           } else {
             console.error('createExecutions() received execution with unknown parentType: ' + execution.parentType);
             return;
           }
 
           if(parent !== undefined) {
-            $log.debug('found parent for execution');
+            $log.debug('found parent ' + parent.id +  ' for execution ' + execution.id);
             $log.debug(execution);
             parent.executions[execution.color] = execution;
           } else {

@@ -6,7 +6,7 @@
     .controller('WorkflowController', WorkflowController);
 
   /** @ngInject */
-  function WorkflowController($scope, moment, workflow, executions) {
+  function WorkflowController($scope, $log, workflow, executions) {
     var vm = this;
     vm.report = [];
     vm.abnormal = [];
@@ -14,38 +14,48 @@
     vm.workflow = workflow;
     vm.executions = executions;
 
-    $scope.$watch(function() { return vm.workflow; }, workflowReport);
+    $scope.$watch(function() { return vm.workflow; }, generateReport);
 
-    vm.report = [workflowReport(workflow)];
+    vm.report = [generateReport(workflow)];
 
-    function workflowReport(workflow, color) {
-      color = typeof color !== 'undefined' ? color : 0;
-      var execution = _.find(workflow.executions, 'color', color );
-
-      var tasksPredicate = _.partial(taskReport, 0, 0); // set color and parallelBy before the _.map
-      var tasks = _.map(_.sortBy(workflow.tasks, 'topologicalIndex'), tasksPredicate);
-      if(execution !== undefined) {
+    function generateReport(workflow) {
+      return reportOnWorkflow(workflow);
+    }
+    // Ptero::Concrete::Workflow::ReportWriter->report_on_workflow()
+    function reportOnWorkflow(wf, color) {
+      color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
+      var execution = wf.executions[color];
+      var tasks = [];
+      _.each(_.sortBy(wf.tasks, 'topologicalIndex'), function(task) {
+        tasks.push(reportOnTask(task, color, 0));
+      });
+      if(angular.isUndefined(execution)) {
         return {
           type: 'workflow',
-          name: workflow.name,
+          name: wf.name,
+          status: wf.status,
+          tasks: tasks,
+          methods: reportOnMethods()
+        }
+      } else {
+        return {
+          type: 'workflow',
+          name: wf.name,
           status: execution.status,
           timeStart: execution.timeStarted,
           duration: execution.duration,
           tasks: tasks
         }
-      } else {
-        return {
-          type: 'workflow',
-          name: workflow.name,
-          status: workflow.status,
-          tasks: tasks
-        }
       }
     }
 
-    function taskReport(color, parallelBy, task) {
-      var execution = _.find(task.executions, { color: color } );
-      var parallelInfo;
+    // Ptero::Concrete::Workflow::ReportWriter->report_on_task()
+    function reportOnTask(task, color, parallelBy) {
+      $log.debug('reportOnTask: ' + task.name);
+      $log.debug('-- color: ' + color);
+      $log.debug('-- parallelBy: ' + parallelBy);
+      var parallelInfo,
+        execution = task.executions[color];
 
       if(parallelBy !== undefined && _.has(execution, 'parallelIndexes')) {
         parallelInfo = "[" + execution.parallelIndexes.join(', ') + "]";
@@ -53,15 +63,20 @@
         parallelInfo = "[parallel by: " + task.parallelBy + "]";
       }
 
-      var childTasks = [];
-      var childExecutions = _.select(task.executions, { parentId: task.id, parentColor: color });
-
-      _.each(childExecutions, function(exec) {
-        var childReport = taskReport(exec.color, 1, exec);
-        childTasks.push(childReport);
+      var methods = [];
+      _.each(task.methods, function(method) {
+        methods.push(reportOnMethod(method, color));
       });
 
-      if(execution !== undefined) {
+      // TODO: report on child executions
+      if(!angular.isUndefined(execution)) {
+        return {
+          type: 'task',
+          name: task.name,
+          parallelInfo: parallelInfo,
+          methods: methods
+        };
+      } else {
         return {
           type: 'task',
           name: task.name,
@@ -69,22 +84,17 @@
           timeStarted: execution.timeStarted,
           duration: execution.duration,
           parallelInfo: parallelInfo,
-          methods: methodsReport(task.methods, color),
-          tasks: childTasks
-        }
-      } else {
-        return {
-          type: 'task',
-          name: task.name,
-          parallelInfo: parallelInfo,
-          methods: methodsReport(task.methods, color)
-        }
+          methods: methods
+        };
       }
     }
 
 
-    function methodsReport(m) {
-      return m;
+    function reportOnMethod(method, color) {
+      $log.debug('reportOnMethod: ' + method.name);
+      $log.debug('-- color: ' + color);
+      $log.debug('-- service: ' + method.service);
+      return method;
     }
 
   }
