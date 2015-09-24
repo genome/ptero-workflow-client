@@ -14,88 +14,147 @@
     vm.workflow = workflow;
     vm.executions = executions;
 
-    //$scope.$watch(function() { return vm.workflow; }, generateReport);
-    //
-    //vm.report = [generateReport(workflow)];
-    //
-    //function generateReport(workflow) {
-    //  return reportOnWorkflow(workflow);
-    //}
-    //// Ptero::Concrete::Workflow::ReportWriter->report_on_workflow()
-    //function reportOnWorkflow(wf, color) {
-    //  color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
-    //  var execution = wf.executions[color];
-    //  var tasks = [];
-    //  _.each(_.sortBy(wf.tasks, 'topologicalIndex'), function(task) {
-    //    tasks.push(reportOnTask(task, color, 0));
-    //  });
-    //  if(angular.isUndefined(execution)) {
-    //    return {
-    //      type: 'workflow',
-    //      name: wf.name,
-    //      status: wf.status,
-    //      tasks: tasks,
-    //      methods: reportOnMethods()
-    //    }
-    //  } else {
-    //    return {
-    //      type: 'workflow',
-    //      name: wf.name,
-    //      status: execution.status,
-    //      timeStart: execution.timeStarted,
-    //      duration: execution.duration,
-    //      tasks: tasks
-    //    }
-    //  }
-    //}
-    //
+    vm.report = [generateReport(workflow)];
+
+    $scope.$watch(function() { return vm.workflow; }, generateReport);
+
+    function generateReport(workflow) {
+      return reportOnWorkflow(workflow);
+    }
+    // Ptero::Concrete::Workflow::ReportWriter->report_on_workflow()
+    function reportOnWorkflow(wf, color) {
+      color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
+      var execution = wf.executions[color];
+      var tasks = [];
+      _.each(_.sortBy(wf.tasks, 'topologicalIndex'), function(task) {
+        tasks.push(reportOnTask(task, color, 0));
+      });
+      if(angular.isUndefined(execution)) {
+        return {
+          type: 'workflow',
+          id: wf.id,
+          name: wf.name,
+          status: wf.status,
+          tasks: tasks,
+          methods: reportOnMethods()
+        }
+      } else {
+        return {
+          type: 'workflow',
+          id: wf.id,
+          name: wf.name,
+          status: execution.status,
+          timeStart: execution.timeStarted,
+          duration: execution.duration,
+          tasks: tasks,
+          execution: execution
+        }
+      }
+    }
+
     //// Ptero::Concrete::Workflow::ReportWriter->report_on_task()
-    //function reportOnTask(task, color, parallelBy) {
-    //  $log.debug('reportOnTask: ' + task.name);
-    //  $log.debug('-- color: ' + color);
-    //  $log.debug('-- parallelBy: ' + parallelBy);
-    //  var parallelInfo,
-    //    execution = task.executions[color];
-    //
-    //  if(parallelBy !== undefined && _.has(execution, 'parallelIndexes')) {
-    //    parallelInfo = "[" + execution.parallelIndexes.join(', ') + "]";
-    //  } else {
-    //    parallelInfo = "[parallel by: " + task.parallelBy + "]";
-    //  }
-    //
-    //  var methods = [];
-    //  _.each(task.methods, function(method) {
-    //    methods.push(reportOnMethod(method, color));
-    //  });
-    //
-    //  // TODO: report on child executions
-    //  if(!angular.isUndefined(execution)) {
-    //    return {
-    //      type: 'task',
-    //      name: task.name,
-    //      parallelInfo: parallelInfo,
-    //      methods: methods
-    //    };
-    //  } else {
-    //    return {
-    //      type: 'task',
-    //      name: task.name,
-    //      status: execution.status,
-    //      timeStarted: execution.timeStarted,
-    //      duration: execution.duration,
-    //      parallelInfo: parallelInfo,
-    //      methods: methods
-    //    };
-    //  }
-    //}
-    //
-    //
-    //function reportOnMethod(method, color) {
-    //  $log.debug('reportOnMethod: ' + method.name);
-    //  $log.debug('-- color: ' + color);
-    //  $log.debug('-- service: ' + method.service);
-    //  return method;
-    //}
+    function reportOnTask(task, color, parallelBy) {
+      //$log.debug('reportOnTask: ' + task.name);
+      //$log.debug('-- color: ' + color);
+      //$log.debug('-- parallelBy: ' + parallelBy);
+      var execution = task.executions[color];
+
+      var methods = [];
+      _.each(task.methods, function(method) {
+        methods.push(reportOnMethod(method, color));
+      });
+
+      //_.each(additionalColors(task, color), function(execution, index, executions) {
+      //  reportOnTask(task, execution.color, 1);
+      //});
+      var tasks = [];
+      tasks = _.map(_.filter(task.executions, 'parentColor', color), function(exec) {
+        return reportOnTask(task, exec.color, 1);
+      });
+
+      var parallelByInfo;
+      if(!_.isUndefined(parallelBy) && parallelBy !== 0) {
+        parallelByInfo = '[' + execution.parallelIndexes.join(',') + ']';
+      } else if(!_.isUndefined(task.parallelBy) && task.parallelBy !== 0) {
+        parallelByInfo = '[parallel-by: ' + task.parallelBy + ']';
+      }
+
+      // TODO: report on child executions
+      if(_.isUndefined(execution)) {
+        return {
+          type: 'task',
+          id: task.id,
+          name: task.name,
+          parallelBy: task.parallelBy,
+          parallelByInfo: parallelByInfo,
+          tasks: tasks,
+          methods: methods
+        };
+      } else {
+        return {
+          type: 'task',
+          name: task.name,
+          id: task.id,
+          status: execution.status,
+          timeStarted: execution.timeStarted,
+          duration: execution.duration,
+          parallelBy: task.parallelBy,
+          parallelByInfo: parallelByInfo,
+          tasks: tasks,
+          methods: methods
+        };
+      }
+
+      function additionalColors(task, color) {
+        return _.chain(task.executions)
+          .map(function(execution, eColor) {
+            if (execution.parentColor === color) {
+              $log.debug('found execution with parent color ' + color);
+              $log.debug(execution)
+            }
+            return execution.parentColor === color ? execution : null;
+          })
+          .compact()
+          .sortBy('color')
+          .value();
+      }
+
+    }
+
+    function reportOnMethod(method, color) {
+      //$log.debug('reportOnMethod: ' + method.name);
+      //$log.debug('-- color: ' + color);
+      //$log.debug('-- service: ' + method.service);
+      var execution = method.executions[color];
+      var tasks = [];
+      _.each(_.sortBy(method.tasks, 'topologicalIndex'), function(task) {
+        tasks.push(reportOnTask(task, color, 0));
+      });
+
+      if(_.isUndefined(execution)) {
+        return {
+          id: method.id,
+          name: method.name,
+          service: method.service,
+          tasks: tasks,
+          executions: method.executions
+        };
+      } else {
+        return {
+          id: method.id,
+          name: method.name,
+          service: method.service,
+          status: execution.status,
+          started: execution.started,
+          duration: execution.duration,
+          childWorkflowProxies: execution.childWorkflowProxies,
+          tasks: tasks,
+          executions: method.executions
+        }
+      }
+
+
+    }
 
   }
 })();

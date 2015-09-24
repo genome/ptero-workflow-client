@@ -145,8 +145,8 @@
 
         // Ptero::Concrete::Workflow::Method->new()
         function newMethod(method) {
-          $log.debug('----- parsing method: ' + method.name);
-          $log.debug(method);
+          //$log.debug('----- parsing method: ' + method.name);
+          //$log.debug(method);
           return {
             id: method.id,
             name: method.name,
@@ -157,8 +157,8 @@
         }
         // corresponds to Ptero::Concrete::Workflow::DAG->new()
         function newDag(dag) {
-          $log.debug('----- parsing dag: ' + dag.name);
-          $log.debug(dag);
+          //$log.debug('----- parsing dag: ' + dag.name);
+          //$log.debug(dag);
           return {
             id: dag.id,
             name: dag.name,
@@ -191,9 +191,9 @@
             return;
           }
 
-          if(parent !== undefined) {
-            $log.debug('found parent ' + parent.id +  ' for execution ' + execution.id);
-            $log.debug(execution);
+          if(!_.isUndefined(parent)) {
+            //$log.debug('found parent ' + parent.id +  ' for execution ' + execution.id);
+            //$log.debug(execution);
             parent.executions[execution.color] = execution;
           } else {
             executions.push(execution);

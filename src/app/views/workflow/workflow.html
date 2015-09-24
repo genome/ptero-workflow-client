@@ -2,11 +2,11 @@
   <div class="row">
     <div class="col-xs-6">
       <h1>Workflow</h1>
-      <ul>
-        <li ng-repeat="execution in vm.report">
-          {{ execution.id }} | {{ execution.parentType }}
-        </li>
-      </ul>
+      <div>
+        <ol id="tree-root">
+          <li ng-repeat="workflow in vm.report" ng-include="'workflow_render.html'"></li>
+        </ol>
+      </div>
       <pre ng-bind="vm.report|json"></pre>
     </div>
     <div class="col-xs-6">
@@ -32,5 +32,44 @@
     </div>
   </div>
 
+  <!-- *** WORKFLOW TREE TEMPLATES *** -->
+
+  <!-- workflow -->
+  <script type="text/ng-template" id="workflow_render.html">
+    <div >
+      Workflow: {{workflow.name}} {{ workflow.id }}
+    </div>
+    <ol>
+      <li ng-repeat="task in workflow.tasks" ui-tree-node ng-include="'workflow_task_render.html'">
+      </li>
+    </ol>
+  </script>
+
+  <!-- workflow task -->
+  <script type="text/ng-template" id="workflow_task_render.html">
+    <div>
+      Task: {{ task.name}} {{ task.id }} <span ng-bind="task.parallelByInfo"></span>
+    </div>
+    <ol>
+      <li ng-repeat="method in task.methods" ui-tree-node ng-include="'workflow_method_render.html'">
+      </li>
+    </ol>
+    <ol ng-if="task.tasks.length > 0">
+      <li ng-repeat="task in task.tasks" ui-tree-node ng-include="'workflow_task_render.html'">
+      </li>
+    </ol>
+  </script>
+
+  <!-- workflow method -->
+  <script type="text/ng-template" id="workflow_method_render.html">
+    <div>
+      Method: {{ method.service }} {{ method.name }} {{ method.id }}
+    </div>
+    <ol>
+      <li ng-repeat="task in method.tasks" ng-include="'workflow_task_render.html'">
+
+      </li>
+    </ol>
+  </script>
 </div>
 
