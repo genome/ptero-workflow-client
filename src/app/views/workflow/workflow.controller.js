@@ -6,7 +6,7 @@
     .controller('WorkflowController', WorkflowController);
 
   /** @ngInject */
-  function WorkflowController($scope, $log, workflow, executions) {
+  function WorkflowController($scope, $log, _, workflow, executions) {
     var vm = this;
     vm.report = [];
     vm.abnormal = [];
