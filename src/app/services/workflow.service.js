@@ -82,11 +82,9 @@
       };
 
       // REGISTER WORKFLOW COMPONENTS (Ptero::Concrete::Workflow->register_components()
-
-      /// TODO: DAGs aren't recursing - create separate 'register' function and recurse into sub-tasks and sub-methods
       // Ptero::Concrete::Workflow::Task->register_with_workflow()
       _.each(wf.tasks, function(task) {
-        wf.taskIndex[task.id] = task;        
+        wf.taskIndex[task.id] = task;
         registerWithWorkflow(task);
       });
 
