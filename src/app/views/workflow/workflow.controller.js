@@ -85,7 +85,8 @@
           parallelBy: task.parallelBy,
           parallelByInfo: parallelByInfo,
           tasks: tasks,
-          methods: methods
+          methods: methods,
+          executions: task.executions
         };
       } else {
         return {
@@ -98,24 +99,10 @@
           parallelBy: task.parallelBy,
           parallelByInfo: parallelByInfo,
           tasks: tasks,
-          methods: methods
+          methods: methods,
+          executions: task.executions
         };
       }
-
-      function additionalColors(task, color) {
-        return _.chain(task.executions)
-          .map(function(execution, eColor) {
-            if (execution.parentColor === color) {
-              $log.debug('found execution with parent color ' + color);
-              $log.debug(execution)
-            }
-            return execution.parentColor === color ? execution : null;
-          })
-          .compact()
-          .sortBy('color')
-          .value();
-      }
-
     }
 
     function reportOnMethod(method, color) {
