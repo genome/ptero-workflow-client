@@ -8,7 +8,8 @@
       'ui.router',
       'ui.bootstrap',
       'pteroWorkflowClient.services',
-      'pteroWorkflowClient.views'
+      'pteroWorkflowClient.views',
+      'jsonFormatter'
     ]);
 
 })();
