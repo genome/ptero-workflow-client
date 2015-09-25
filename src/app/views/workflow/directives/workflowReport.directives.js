@@ -3,7 +3,9 @@
 
   angular
     .module('pteroWorkflowClient.views')
-    .directive('workflowReport', workflowReport);
+    .directive('workflowReport', workflowReport)
+    .directive('methodReport', methodReport)
+    .directive('taskReport', taskReport);
 
   /* @ngInject */
   function workflowReport () {
@@ -13,7 +15,7 @@
     //
     var directive = {
       bindToController: true,
-      controller: Controller,
+      controller: workflowReportController,
       controllerAs: 'vm',
       link: link,
       restrict: 'E',
@@ -30,9 +32,9 @@
   }
 
   /* @ngInject */
-  function Controller ($log, _) {
+  function workflowReportController ($log, _) {
     var vm = this;
-    this.report = [generateReport(this.workflow)];
+    vm.report = [generateReport(vm.workflow)];
 
     function generateReport(workflow) {
       return reportOnWorkflow(workflow);
@@ -156,4 +158,62 @@
     }
 
   }
+
+  /* @ngInject */
+  function taskReport () {
+    // Usage:
+    //
+    // Creates:
+    //
+    var directive = {
+      bindToController: true,
+      controller: taskReportController,
+      controllerAs: 'vm',
+      link: link,
+      restrict: 'E',
+      scope: {
+        task: '='
+      },
+      templateUrl: 'app/views/workflow/directives/taskReport.html'
+    };
+    return directive;
+
+    function link(scope, element, attrs) {
+    }
+  }
+
+  /* @ngInject */
+  function taskReportController ($log, _) {}
+
+  /* @ngInject */
+  function methodReport () {
+    // Usage:
+    //
+    // Creates:
+    //
+    var directive = {
+      bindToController: true,
+      controller: methodReportController,
+      controllerAs: 'vm',
+      link: link,
+      restrict: 'E',
+      require: '^taskReport',
+      scope: {
+        method: '=',
+        color: '='
+      },
+      templateUrl: 'app/views/workflow/directives/methodReport.html'
+    };
+    return directive;
+
+    function link(scope, element, attrs, taskReportController) {
+      console.log('methodReportController link');
+    }
+  }
+
+  /* @ngInject */
+  function methodReportController ($log, _) { }
+
+
+
 })();

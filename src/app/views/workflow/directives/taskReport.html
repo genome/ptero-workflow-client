@@ -1,0 +1,16 @@
+<div class="taskReport">
+  <div>
+    TASK {{ vm.task.id }}: {{ vm.task.name }} <span ng-bind="vm.task.parallelByInfo"></span>
+  </div>
+  <ol>
+    <li ng-repeat="method in vm.task.methods">
+      <method-report method="method"></method-report>
+    </li>
+  </ol>
+  <!--<ol>-->
+  <!--<li ng-repeat="method in task.methods" ng-include="'workflow_method_render.html'"></li>-->
+  <!--</ol>-->
+  <!--<ol ng-if="task.tasks.length > 0">-->
+  <!--<li ng-repeat="task in task.tasks" ng-include="'workflow_task_render.html'"></li>-->
+  <!--</ol>-->
+</div>
