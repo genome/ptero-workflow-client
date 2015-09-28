@@ -1,9 +1,11 @@
 <div class="methodReport">
-  <p>TASK COLOR: {{ task.color }}</p>
-  <div>
-    METHOD {{ method.service | uppercase }} {{ method.id }}: {{ method.name }}
-  </div>
+
   <ol>
-    <li ng-repeat="task in method.tasks" ng-include="'workflow_task_render.html'"></li>
+    <li ng-repeat="method in vm.task.methods">
+      <div>
+        METHOD {{ method.service | uppercase }} {{ method.id }}: {{ method.name }}
+      </div>
+      <task-report tasks="method.tasks" color="method.color" parallel-by=""></task-report>
+    </li>
   </ol>
 </div>

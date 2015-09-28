@@ -2,17 +2,13 @@
   <ol id="tree-root">
     <li ng-repeat="workflow in vm.report">
       {{workflow.name}}
-      <ol>
-        <li ng-repeat="task in workflow.tasks">
-          <task-report task="task"></task-report>
-        </li>
-      </ol>
+      <task-report tasks="vm.workflow.tasks" color="0" parallel-by="0"></task-report>
     </li>
   </ol>
   <div class="row">
     <div class="col-xs-6">
       <h2>Report</h2>
-      <json-formatter json="vm.report" open="2"></json-formatter>
+      <json-formatter json="vm.report" open="3"></json-formatter>
     </div>
     <div class="col-xs-6">
       <h2>Workflow</h2>
