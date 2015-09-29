@@ -2,9 +2,10 @@
   <ol>
     <li ng-repeat="task in vm.tasks">
       <div>
-        TASK {{ vm.task.id }}: {{ vm.task.name }} <span ng-bind="vm.task.parallelByInfo"></span>
+        TASK {{ task.id }}: {{ task.name }} {{ task.parallelByInfo }}
       </div>
-      <method-report methods="task.methods" color="vm.color"></method-report>
+      <!--<method-report methods="task.methods" color="vm.color"></method-report>-->
+      <pre ng-bind="task|json"></pre>
     </li>
   </ol>
   <!--<ol>-->

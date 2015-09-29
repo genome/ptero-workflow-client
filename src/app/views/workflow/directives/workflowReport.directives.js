@@ -172,7 +172,9 @@
       link: link,
       restrict: 'E',
       scope: {
-        task: '='
+        tasks: '=',
+        color: '=',
+        parallelBy: '='
       },
       templateUrl: 'app/views/workflow/directives/taskReport.html'
     };
@@ -183,7 +185,9 @@
   }
 
   /* @ngInject */
-  function taskReportController ($log, _) {}
+  function taskReportController ($log, _) {
+    $log.debug('taskReportController loaded.');
+  }
 
   /* @ngInject */
   function methodReport () {
@@ -197,7 +201,6 @@
       controllerAs: 'vm',
       link: link,
       restrict: 'E',
-      require: '^taskReport',
       scope: {
         method: '=',
         color: '='
@@ -206,13 +209,14 @@
     };
     return directive;
 
-    function link(scope, element, attrs, taskReportController) {
-      console.log('methodReportController link');
+    function link(scope, element, attrs) {
     }
   }
 
   /* @ngInject */
-  function methodReportController ($log, _) { }
+  function methodReportController ($log, _) {
+    $log.debug('methodReportController loaded.');
+  }
 
 
 
