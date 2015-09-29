@@ -43,18 +43,13 @@
     // Ptero::Concrete::Workflow::ReportWriter->report_on_workflow()
     function reportOnWorkflow(wf, color) {
       color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
-      var execution = wf.executions[color];
-      var tasks = [];
-      _.each(_.sortBy(wf.tasks, 'topologicalIndex'), function(task) {
-        tasks.push(reportOnTask(task, color, 0));
-      });
       if(angular.isUndefined(execution)) {
         return {
           type: 'workflow',
           id: wf.id,
           name: wf.name,
           status: wf.status,
-          tasks: tasks,
+          tasks: wf.tasks,
           // methods: reportOnMethods()
         }
       } else {
@@ -65,62 +60,9 @@
           status: execution.status,
           timeStart: execution.timeStarted,
           duration: execution.duration,
-          tasks: tasks,
+          tasks: wf.tasks,
           execution: execution
         }
-      }
-    }
-
-    //// Ptero::Concrete::Workflow::ReportWriter->report_on_task()
-    function reportOnTask(task, color, parallelBy) {
-      //$log.debug('reportOnTask: ' + task.name);
-      //$log.debug('-- color: ' + color);
-      //$log.debug('-- parallelBy: ' + parallelBy);
-      var execution = task.executions[color];
-
-      var methods = [];
-      _.each(task.methods, function(method) {
-        methods.push(reportOnMethod(method, color));
-      });
-
-      var tasks = [];
-      tasks = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
-        return reportOnTask(task, exec.color, 1);
-      });
-
-      var parallelByInfo;
-
-      if(parallelBy) {
-        parallelByInfo = '[' + execution.parallelIndexes.join(',') + ']';
-      } else if(task.parallelBy) {
-        parallelByInfo = '[parallel-by: ' + task.parallelBy + ']';
-      }
-
-      if(_.isUndefined(execution)) {
-        return {
-          type: 'task',
-          id: task.id,
-          name: task.name,
-          parallelBy: task.parallelBy,
-          parallelByInfo: parallelByInfo,
-          tasks: tasks,
-          methods: methods,
-          executions: task.executions
-        };
-      } else {
-        return {
-          type: 'task',
-          name: task.name,
-          id: task.id,
-          status: execution.status,
-          timeStarted: execution.timeStarted,
-          duration: execution.duration,
-          parallelBy: task.parallelBy,
-          parallelByInfo: parallelByInfo,
-          tasks: tasks,
-          methods: methods,
-          executions: task.executions
-        };
       }
     }
 
@@ -176,17 +118,80 @@
         color: '=',
         parallelBy: '='
       },
+      require: '^^workflowReport',
       templateUrl: 'app/views/workflow/directives/taskReport.html'
     };
     return directive;
 
-    function link(scope, element, attrs) {
+    function link(scope, element, attrs, workflowReportController) {
+      console.log('taskReport link called.');
+      scope.reportOn = workflowReportController.reportOn;
     }
   }
 
   /* @ngInject */
   function taskReportController ($log, _) {
     $log.debug('taskReportController loaded.');
+    var vm = this;
+    //// Ptero::Concrete::Workflow::ReportWriter->report_on_task()
+
+    vm.taskReports = [];
+    _.each(_.sortBy(vm.tasks, 'topologicalIndex'), function(task) {
+      vm.taskReports.push(reportOnTask(task, vm.color, vm.parallelBy));
+    });
+
+    // TODO: return un-parsed tasks, methods for this task, move method-parsing code to method directive
+    function reportOnTask(task, color, parallelBy) {
+      //$log.debug('reportOnTask: ' + task.name);
+      //$log.debug('-- color: ' + color);
+      //$log.debug('-- parallelBy: ' + parallelBy);
+      var execution = task.executions[color];
+
+      var methods = [];
+      _.each(task.methods, function(method) {
+        methods.push(reportOnMethod(method, color));
+      });
+
+      var tasks = [];
+      tasks = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
+        return reportOnTask(task, exec.color, 1);
+      });
+
+      var parallelByInfo;
+
+      if(parallelBy) {
+        parallelByInfo = '[' + execution.parallelIndexes.join(',') + ']';
+      } else if(task.parallelBy) {
+        parallelByInfo = '[parallel-by: ' + task.parallelBy + ']';
+      }
+
+      if(_.isUndefined(execution)) {
+        return {
+          type: 'task',
+          id: task.id,
+          name: task.name,
+          parallelBy: task.parallelBy,
+          parallelByInfo: parallelByInfo,
+          tasks: tasks,
+          methods: methods,
+          executions: task.executions
+        };
+      } else {
+        return {
+          type: 'task',
+          name: task.name,
+          id: task.id,
+          status: execution.status,
+          timeStarted: execution.timeStarted,
+          duration: execution.duration,
+          parallelBy: task.parallelBy,
+          parallelByInfo: parallelByInfo,
+          tasks: tasks,
+          methods: methods,
+          executions: task.executions
+        };
+      }
+    }
   }
 
   /* @ngInject */
