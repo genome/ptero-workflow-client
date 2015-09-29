@@ -43,13 +43,14 @@
     // Ptero::Concrete::Workflow::ReportWriter->report_on_workflow()
     function reportOnWorkflow(wf, color) {
       color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
+      var execution = wf.executions[color];
       if(angular.isUndefined(execution)) {
         return {
           type: 'workflow',
           id: wf.id,
           name: wf.name,
           status: wf.status,
-          tasks: wf.tasks,
+          tasks: wf.tasks
           // methods: reportOnMethods()
         }
       } else {
@@ -65,6 +66,132 @@
         }
       }
     }
+
+  }
+
+  /* @ngInject */
+  function taskReport () {
+    // Usage:
+    //
+    // Creates:
+    //
+    var directive = {
+      bindToController: true,
+      controller: taskReportController,
+      controllerAs: 'vm',
+      link: link,
+      restrict: 'E',
+      scope: {
+        tasks: '=',
+        color: '=',
+        parallelBy: '='
+      },
+      templateUrl: 'app/views/workflow/directives/taskReport.html'
+    };
+    return directive;
+
+    function link(scope, element, attrs) {
+      console.log('taskReport link called.');
+    }
+  }
+
+  /* @ngInject */
+  function taskReportController ($log, _) {
+    $log.debug('taskReportController loaded.');
+    var vm = this;
+    //// Ptero::Concrete::Workflow::ReportWriter->report_on_task()
+
+    vm.taskReports = [];
+    _.each(_.sortBy(vm.tasks, 'topologicalIndex'), function(task) {
+      vm.taskReports.push(reportOnTask(task, vm.color, vm.parallelBy));
+    });
+
+    vm.childTasks = [];
+
+    // TODO: return un-parsed tasks, methods for this task, move method-parsing code to method directive
+    function reportOnTask(task, color, parallelBy) {
+      //$log.debug('reportOnTask: ' + task.name);
+      //$log.debug('-- color: ' + color);
+      //$log.debug('-- parallelBy: ' + parallelBy);
+      var execution = task.executions[color];
+
+      vm.childTasks = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
+        return reportOnTask(task, exec.color, 1);
+      });
+
+      var parallelByInfo;
+
+      if(parallelBy) {
+        parallelByInfo = '[' + execution.parallelIndexes.join(',') + ']';
+      } else if(task.parallelBy) {
+        parallelByInfo = '[parallel-by: ' + task.parallelBy + ']';
+      }
+
+      if(_.isUndefined(execution)) {
+        return {
+          type: 'task',
+          id: task.id,
+          name: task.name,
+          parallelBy: task.parallelBy,
+          parallelByInfo: parallelByInfo,
+          executions: task.executions,
+          methods: task.methods
+        };
+      } else {
+        return {
+          type: 'task',
+          name: task.name,
+          id: task.id,
+          status: execution.status,
+          timeStarted: execution.timeStarted,
+          duration: execution.duration,
+          parallelBy: task.parallelBy,
+          parallelByInfo: parallelByInfo,
+          executions: task.executions,
+          methods: task.methods
+        };
+      }
+    }
+  }
+
+  /* @ngInject */
+  function methodReport () {
+    // Usage:
+    //
+    // Creates:
+    //
+    var directive = {
+      bindToController: true,
+      controller: methodReportController,
+      controllerAs: 'vm',
+      link: link,
+      restrict: 'E',
+      scope: {
+        methods: '=',
+        color: '='
+      },
+      templateUrl: 'app/views/workflow/directives/methodReport.html'
+    };
+    return directive;
+
+    function link(scope, element, attrs) {
+    }
+  }
+
+  /* @ngInject */
+  function methodReportController ($log, _) {
+    var vm = this;
+    $log.debug('methodReportController loaded.');
+
+    vm.methodReports = [];
+
+    _.each(vm.methods, function(method) {
+      if (angular.isUndefined(method.executions[vm.color])){
+        return null;
+      } else {
+        return reportOnMethod(method, vm.color);
+      }
+    });
 
     function reportOnMethod(method, color) {
       //$log.debug('reportOnMethod: ' + method.name);
@@ -98,131 +225,5 @@
         }
       }
     }
-
   }
-
-  /* @ngInject */
-  function taskReport () {
-    // Usage:
-    //
-    // Creates:
-    //
-    var directive = {
-      bindToController: true,
-      controller: taskReportController,
-      controllerAs: 'vm',
-      link: link,
-      restrict: 'E',
-      scope: {
-        tasks: '=',
-        color: '=',
-        parallelBy: '='
-      },
-      require: '^^workflowReport',
-      templateUrl: 'app/views/workflow/directives/taskReport.html'
-    };
-    return directive;
-
-    function link(scope, element, attrs, workflowReportController) {
-      console.log('taskReport link called.');
-      scope.reportOn = workflowReportController.reportOn;
-    }
-  }
-
-  /* @ngInject */
-  function taskReportController ($log, _) {
-    $log.debug('taskReportController loaded.');
-    var vm = this;
-    //// Ptero::Concrete::Workflow::ReportWriter->report_on_task()
-
-    vm.taskReports = [];
-    _.each(_.sortBy(vm.tasks, 'topologicalIndex'), function(task) {
-      vm.taskReports.push(reportOnTask(task, vm.color, vm.parallelBy));
-    });
-
-    // TODO: return un-parsed tasks, methods for this task, move method-parsing code to method directive
-    function reportOnTask(task, color, parallelBy) {
-      //$log.debug('reportOnTask: ' + task.name);
-      //$log.debug('-- color: ' + color);
-      //$log.debug('-- parallelBy: ' + parallelBy);
-      var execution = task.executions[color];
-
-      var methods = [];
-      _.each(task.methods, function(method) {
-        methods.push(reportOnMethod(method, color));
-      });
-
-      var tasks = [];
-      tasks = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
-        return reportOnTask(task, exec.color, 1);
-      });
-
-      var parallelByInfo;
-
-      if(parallelBy) {
-        parallelByInfo = '[' + execution.parallelIndexes.join(',') + ']';
-      } else if(task.parallelBy) {
-        parallelByInfo = '[parallel-by: ' + task.parallelBy + ']';
-      }
-
-      if(_.isUndefined(execution)) {
-        return {
-          type: 'task',
-          id: task.id,
-          name: task.name,
-          parallelBy: task.parallelBy,
-          parallelByInfo: parallelByInfo,
-          tasks: tasks,
-          methods: methods,
-          executions: task.executions
-        };
-      } else {
-        return {
-          type: 'task',
-          name: task.name,
-          id: task.id,
-          status: execution.status,
-          timeStarted: execution.timeStarted,
-          duration: execution.duration,
-          parallelBy: task.parallelBy,
-          parallelByInfo: parallelByInfo,
-          tasks: tasks,
-          methods: methods,
-          executions: task.executions
-        };
-      }
-    }
-  }
-
-  /* @ngInject */
-  function methodReport () {
-    // Usage:
-    //
-    // Creates:
-    //
-    var directive = {
-      bindToController: true,
-      controller: methodReportController,
-      controllerAs: 'vm',
-      link: link,
-      restrict: 'E',
-      scope: {
-        method: '=',
-        color: '='
-      },
-      templateUrl: 'app/views/workflow/directives/methodReport.html'
-    };
-    return directive;
-
-    function link(scope, element, attrs) {
-    }
-  }
-
-  /* @ngInject */
-  function methodReportController ($log, _) {
-    $log.debug('methodReportController loaded.');
-  }
-
-
-
 })();

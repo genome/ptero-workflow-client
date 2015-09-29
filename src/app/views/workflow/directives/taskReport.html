@@ -1,10 +1,11 @@
 <div class="taskReport">
   <ol>
-    <li ng-repeat="task in vm.tasks">
+    <li ng-repeat="task in vm.taskReports">
       <div>
         TASK {{ task.id }}: {{ task.name }} {{ task.parallelByInfo }}
       </div>
-      <!--<method-report methods="task.methods" color="vm.color"></method-report>-->
+      <method-report methods="task.methods" color="vm.color"></method-report>
+      <task-report tasks="vm.childTasks" color="vm.color" parallel-by="1"></task-report>
       <!--<pre ng-bind="task|json"></pre>-->
     </li>
   </ol>

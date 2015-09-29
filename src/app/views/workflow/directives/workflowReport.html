@@ -1,7 +1,7 @@
 <div class="workflowReport">
   <ol id="tree-root">
     <li ng-repeat="workflow in vm.report">
-      {{workflow.name}}
+      WORKFLOW {{ workflow.id }}: {{workflow.name}}
       <task-report tasks="workflow.tasks" color="0" parallel-by="0"></task-report>
     </li>
   </ol>

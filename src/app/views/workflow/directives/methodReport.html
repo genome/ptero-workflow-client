@@ -1,7 +1,6 @@
-<div class="methodReport">
-
+<div class="methodReport" ng-if="vm.methodReports.length > 0">
   <ol>
-    <li ng-repeat="method in vm.task.methods">
+    <li ng-repeat="method in vm.methodReports">
       <div>
         METHOD {{ method.service | uppercase }} {{ method.id }}: {{ method.name }}
       </div>
