@@ -2,11 +2,12 @@
   <div class="row">
     <div class="col-xs-6">
       <h1>Workflow</h1>
-     <report-tree val="vm.data"></report-tree>
+     <report-tree entity="vm.workflow" params="{ color: 0, parallelBy: 0 }"></report-tree>
     </div>
-    <div class="col-xs-6">
-      <pre ng-bind="vm.data|json"></pre>
-      <json-formatter json="vm.data"></json-formatter>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
+      <json-formatter json="vm.workflow" open="2"></json-formatter>
     </div>
   </div>
 </div>

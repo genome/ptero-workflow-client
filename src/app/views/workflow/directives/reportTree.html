@@ -1,4 +1,26 @@
-<script type="text/ng-template" id="recursive.html">
+<script type="text/ng-template" id="workflowNode.html">
+  <div class="treeNode">
+    <span>Workflow: {{ vm.workflow.name}} ({{vm.workflow.id}})</span>
+    <ul ng-if="vm.isParent" style="margin-left:30px">
+      <li ng-repeat="item in vm.val.items">
+        <report-tree val="item" parent-data="val.items"></report-tree>
+      </li>
+    </ul>
+  </div>
+</script>
+
+<script type="text/ng-template" id="taskNode.html">
+  <div class="treeNode">
+    <span>{{ vm.val.text }}</span>
+    <ul ng-if="vm.isParent" style="margin-left:30px">
+      <li ng-repeat="item in vm.val.items">
+        <report-tree val="item" parent-data="val.items"></report-tree>
+      </li>
+    </ul>
+  </div>
+</script>
+
+<script type="text/ng-template" id="methodNode.html">
   <div class="treeNode">
     <span>{{ vm.val.text }}</span>
     <ul ng-if="vm.isParent" style="margin-left:30px">

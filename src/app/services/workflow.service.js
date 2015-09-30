@@ -74,6 +74,7 @@
         id: sk.id,
         rootTaskId: sk.rootTaskId,
         name: sk.name,
+        type: 'workflow',
         status: sk.status,
         methodIndex: {},
         taskIndex: {},
@@ -93,6 +94,7 @@
         _.each(component.methods, registerMethod);
 
         function registerTask(task) {
+          task.type = 'task';
           wf.taskIndex[task.id] = task;
           _.each(task.methods, function(method) {
             registerMethod(method);
@@ -102,6 +104,7 @@
         }
 
         function registerMethod(method) {
+          method.type = 'method';
           wf.methodIndex[method.id] = method;
           _.each(method.tasks, function(task) {
             registerTask(task);
@@ -123,6 +126,7 @@
       return {
         id: task.id,
         name: name,
+        type: 'task',
         parallelBy: task.parallelBy,
         topologicalIndex: task.topologicalIndex,
         methods: getTaskMethods(task),
@@ -149,6 +153,7 @@
           return {
             id: method.id,
             name: method.name,
+            type: 'method',
             service: method.service,
             serviceUrl: method.serviceUrl ? method.serviceUrl : null, // only job methods have serviceUrls
             executions: {}
@@ -161,6 +166,7 @@
           return {
             id: dag.id,
             name: dag.name,
+            type: 'dag',
             service: dag.service,
             tasks: _.map(dag.parameters.tasks, newTask),
             executions: {}
@@ -205,6 +211,7 @@
       return {
         id: exec.id,
         name: name,
+        type: 'execution',
         parentId: getParentId(exec),
         parentType: getParentType(exec),
         timeStarted: getTimeStarted(exec),

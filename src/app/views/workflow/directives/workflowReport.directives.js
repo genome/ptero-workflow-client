@@ -34,7 +34,7 @@
   /* @ngInject */
   function workflowReportController ($log, _) {
     var vm = this;
-    vm.report = [generateReport(vm.workflow)];
+    vm.report = generateReport(vm.workflow);
 
     function generateReport(workflow) {
       return reportOnWorkflow(workflow);
