@@ -1,31 +1,36 @@
-<script type="text/ng-template" id="workflowNode.html">
+<script type="text/ng-template" id="workflowTree.html">
   <div class="treeNode">
-    <span>Workflow: {{ vm.entity.name}} ({{vm.entity.id}})</span>
-    <ul ng-if="vm.isParent" style="margin-left:30px">
-      <li ng-repeat="task in vm.entity.tasks">
+    <span>Workflow {{vm.workflow.id}}: {{ vm.workflow.name}}</span>
+    <ul ng-if="vm.hasTasks">
+      <li ng-repeat="task in vm.workflow.tasks">
         <report-tree entity="task" params="{ color: 0, parallelBy: 0 }"></report-tree>
       </li>
     </ul>
   </div>
 </script>
 
-<script type="text/ng-template" id="taskNode.html">
+<script type="text/ng-template" id="taskTree.html">
   <div class="treeNode">
-    <span>Task: {{ vm.entity.id}}</span>
-    <ul ng-if="vm.isParent" style="margin-left:30px">
-      <li ng-repeat="item in vm.val.items">
-        <report-tree val="item" parent-data="val.items"></report-tree>
+    <span>Task {{ vm.task.id}}: {{vm.task.name}} {{ vm.task.parallelByInfo }}</span>
+    <ul ng-if="vm.relevantMethods.length > 0">
+      <li ng-repeat="method in vm.relevantMethods">
+        <report-tree entity="method" params="{ color: vm.params.color }"></report-tree>
+      </li>
+    </ul>
+    <ul ng-if="vm.relevantExecutionColors.length > 0">
+      <li ng-repeat="color in vm.relevantExecutionColors">
+        <report-tree entity="vm.task" params="{ color: color, parallelBy: 1 }"></report-tree>
       </li>
     </ul>
   </div>
 </script>
 
-<script type="text/ng-template" id="methodNode.html">
+<script type="text/ng-template" id="methodTree.html">
   <div class="treeNode">
-    <span>{{ vm.val.text }}</span>
+    <span>{{ vm.method.name}}</span>
     <ul ng-if="vm.isParent" style="margin-left:30px">
-      <li ng-repeat="item in vm.val.items">
-        <report-tree val="item" parent-data="val.items"></report-tree>
+      <li ng-repeat="task in vm.method.tasks">
+        <report-tree entity="task" params="{ color: vm.params.color }"></report-tree>
       </li>
     </ul>
   </div>

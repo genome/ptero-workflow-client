@@ -207,10 +207,9 @@
       });
     }
 
-    function newExecution(exec, name) { // corresponds to Ptero::Concrete::Workflow::Execution->new()
+    function newExecution(exec, color) { // corresponds to Ptero::Concrete::Workflow::Execution->new()
       return {
         id: exec.id,
-        name: name,
         type: 'execution',
         parentId: getParentId(exec),
         parentType: getParentType(exec),
