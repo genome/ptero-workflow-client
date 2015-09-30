@@ -21,13 +21,12 @@
           template = '';
         if(vm.entity.type === 'workflow') {
           vm.workflow = vm.parseWorkflow(vm.entity);
-          vm.hasTasks = !_.isEmpty(vm.entity.tasks);
           template = 'workflowTree.html';
         } else if (vm.entity.type === 'task') {
           vm.task = vm.parseTask(vm.entity, vm.params.color, vm.params.parallelBy);
           template = 'taskTree.html';
         } else if (vm.entity.type === 'method') {
-          vm.method = vm.parseMethod(vm.entity, vm.params.color)
+          vm.method = vm.parseMethod(vm.entity, vm.params.color);
           template = 'methodTree.html';
         }
 

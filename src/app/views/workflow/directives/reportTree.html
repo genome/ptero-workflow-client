@@ -2,21 +2,49 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="treeNode workflow">
-        <div class="row">
-          <div class="col-xs-6">
-            <span>{{vm.workflow.type|uppercase}} {{vm.workflow.id}}: {{ vm.workflow.name}}</span>
+        <div class="row header">
+          <div class="col-xs-12 col-sm-6">
+            <span class="type">{{vm.workflow.type|capitalize}}</span> <span class="id">{{vm.workflow.id}}</span>: <span class="name">{{ vm.workflow.name}}</span>
           </div>
-          <div class="col-xs-6">
-            <div class="execution pull-right">
-              Started: {{vm.workflow.started}}&nbsp;&nbsp;Status: {{vm.workflow.status}}
+          <div class="col-xs-12 col-sm-6">
+            <div class="execution">
+              <table class="pull-left-xs pull-right-sm">
+                <thead>
+                  <tr>
+                    <th>
+                      Started
+                    </th>
+                    <th>
+                      Duration
+                    </th>
+                    <th>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {{vm.workflow.started}}
+                    </td>
+                    <td>
+                      {{vm.workflow.duration}}
+                    </td>
+                    <td>
+                      {{vm.workflow.status}}
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
         <div class="row">
           <div class="col-xs-12">
-            <ul ng-if="vm.hasTasks">
+            <ul ng-if="vm.workflow.tasks.length > 0">
               <li ng-repeat="task in vm.workflow.tasks|orderBy: 'topologicalIndex'">
-                <report-tree entity="task" params="{ color: 0, parallelBy: 0, indent: 0 }"></report-tree>
+                <report-tree entity="task" params="{ color: 0, parallelBy: 0, indent: vm.params.indent+1 }"></report-tree>
               </li>
             </ul>
           </div>
@@ -30,13 +58,41 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="treeNode task">
-        <div class="row">
-          <div class="col-xs-6">
-            <span>{{vm.task.type|uppercase}} {{ vm.task.id}}: {{vm.task.name}} {{ vm.task.parallelByInfo }}</span>
+        <div class="row header">
+          <div class="col-xs-12 col-sm-6">
+            <span class="type">{{vm.task.type|capitalize}}</span> <span class="id">{{ vm.task.id}}</span>: <span class="name">{{vm.task.name}}</span> <span class="parallel-by">{{ vm.task.parallelByInfo }}</span>
           </div>
-          <div class="col-xs-6">
-            <div class="execution pull-right">
-              Started: {{ vm.task.started }}&nbsp;&nbsp;Status: {{vm.task.status}}
+          <div class="col-xs-12 col-sm-6">
+            <div class="execution">
+              <table class="pull-left-xs pull-right-sm">
+                <thead>
+                  <tr>
+                    <th>
+                      Started
+                    </th>
+                    <th>
+                      Duration
+                    </th>
+                    <th>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {{vm.task.started}}
+                    </td>
+                    <td>
+                      {{vm.task.duration}}
+                    </td>
+                    <td>
+                      {{vm.task.status}}
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -63,13 +119,41 @@
   <div class="row">
     <div class="col-xs-12">
       <div class="treeNode method">
-        <div class="row">
-          <div class="col-xs-6">
-            <span>{{vm.method.type|uppercase}} {{vm.method.id}}: {{ vm.method.name}}</span>
+        <div class="row header">
+          <div class="col-xs-12 col-sm-6">
+            <span class="type">{{vm.method.type|capitalize}}</span> <span class="id">{{vm.method.id}}</span>: <span class="name">{{ vm.method.name}}</span>
           </div>
-          <div class="col-xs-6">
-            <div class="execution pull-right">
-              Started: {{ vm.method.started }}&nbsp;&nbsp;Status: {{vm.method.status}}
+          <div class="col-xs-12 col-sm-6">
+            <div class="execution">
+              <table class="pull-left-xs pull-right-sm">
+                <thead>
+                  <tr>
+                    <th>
+                      Started
+                    </th>
+                    <th>
+                      Duration
+                    </th>
+                    <th>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>
+                      {{vm.method.started}}
+                    </td>
+                    <td>
+                      {{vm.method.duration}}
+                    </td>
+                    <td>
+                      {{vm.method.status}}
+                    </td>
+                  </tr>
+
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
