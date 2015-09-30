@@ -83,7 +83,7 @@
       restrict: 'E',
       scope: {
         tasks: '=',
-        color: '=',
+        colors: '=',
         parallelBy: '='
       },
       templateUrl: 'app/views/workflow/directives/taskReport.html'
@@ -102,8 +102,8 @@
     //// Ptero::Concrete::Workflow::ReportWriter->report_on_task()
 
     vm.taskReports = [];
-    _.each(_.sortBy(vm.tasks, 'topologicalIndex'), function(task) {
-      vm.taskReports.push(reportOnTask(task, vm.color, vm.parallelBy));
+    _.each(_.sortBy(vm.tasks, 'topologicalIndex'), function(task, index) {
+      vm.taskReports.push(reportOnTask(task, vm.colors[index], vm.parallelBy));
     });
 
     vm.childTasks = [];
@@ -115,8 +115,8 @@
       //$log.debug('-- parallelBy: ' + parallelBy);
       var execution = task.executions[color];
 
-      vm.childTasks = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
-        return reportOnTask(task, exec.color, 1);
+      vm.childColors = _.map(_.select(task.executions, 'parentColor', color), function(exec, color) {
+        return color;
       });
 
       var parallelByInfo;
