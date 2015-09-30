@@ -1,0 +1,29 @@
+<div class="executionInfo">
+  <table>
+    <thead>
+      <tr>
+        <th class="started">
+          Started
+        </th>
+        <th class="duration">
+          Duration
+        </th>
+        <th rowspan="2" class="status">
+          {{vm.status}}
+        </th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td class="started">
+          <span am-time-ago="vm.started">time ago</span>
+        </td>
+        <td class="duration">
+          <span ng-bind="vm.duration | amDurationFormat: 'milliseconds'">duration</span>
+        </td>
+        <td class="status"></td>
+      </tr>
+
+    </tbody>
+  </table>
+</div>

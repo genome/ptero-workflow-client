@@ -7,6 +7,7 @@
       'ngResource',
       'ui.router',
       'ui.bootstrap',
+      'angularMoment',
       'pteroWorkflowClient.services',
       'pteroWorkflowClient.views',
       'jsonFormatter'

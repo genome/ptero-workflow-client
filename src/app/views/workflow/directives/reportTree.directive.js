@@ -40,7 +40,7 @@
   }
 
   /* @ngInject */
-  function ReportTreeController($log) {
+  function ReportTreeController($log, _) {
     var vm = this;
     vm.parseWorkflow = function(wf, color) {
       color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
@@ -69,16 +69,13 @@
     };
 
     vm.parseTask = function parseTask(task, color, parallelBy) {
-      //$log.debug('reportOnTask: ' + task.name);
-      //$log.debug('-- color: ' + color);
-      //$log.debug('-- parallelBy: ' + parallelBy);
       var execution = task.executions[color];
 
       vm.relevantMethods = _.select(task.methods, function(method) {
         return !_.isUndefined(method.executions[color]);
       });
 
-      vm.relevantExecutionColors = _.map(_.select(task.executions, 'parentColor', color), function(exec, color) {
+      vm.relevantExecutionColors = _.map(_.select(task.executions, 'parentColor', color), function(exec) {
         return exec.color;
       });
 
@@ -117,14 +114,7 @@
     };
 
     vm.parseMethod = function parseMethod(method, color) {
-      //$log.debug('reportOnMethod: ' + method.name);
-      //$log.debug('-- color: ' + color);
-      //$log.debug('-- service: ' + method.service);
       var execution = method.executions[color];
-      //_.each(_.sortBy(method.tasks, 'topologicalIndex'), function(task) {
-      //  tasks.push(vm.parseTask(task, color, 0));
-      //});
-
       if(_.isUndefined(execution)) {
         return {
           id: method.id,

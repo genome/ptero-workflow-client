@@ -7,37 +7,11 @@
             <span class="type">{{vm.workflow.type|capitalize}}</span> <span class="id">{{vm.workflow.id}}</span>: <span class="name">{{ vm.workflow.name}}</span>
           </div>
           <div class="col-xs-12 col-sm-6">
-            <div class="execution">
-              <table class="pull-left-xs pull-right-sm">
-                <thead>
-                  <tr>
-                    <th>
-                      Started
-                    </th>
-                    <th>
-                      Duration
-                    </th>
-                    <th>
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      {{vm.workflow.started}}
-                    </td>
-                    <td>
-                      {{vm.workflow.duration}}
-                    </td>
-                    <td>
-                      {{vm.workflow.status}}
-                    </td>
-                  </tr>
-
-                </tbody>
-              </table>
-            </div>
+            <execution-info
+              class="pull-left-xs pull-right-sm"
+              started="vm.workflow.started"
+              duration="vm.workflow.duration"
+              status="vm.workflow.status"></execution-info>
           </div>
         </div>
         <div class="row">
@@ -63,37 +37,11 @@
             <span class="type">{{vm.task.type|capitalize}}</span> <span class="id">{{ vm.task.id}}</span>: <span class="name">{{vm.task.name}}</span> <span class="parallel-by">{{ vm.task.parallelByInfo }}</span>
           </div>
           <div class="col-xs-12 col-sm-6">
-            <div class="execution">
-              <table class="pull-left-xs pull-right-sm">
-                <thead>
-                  <tr>
-                    <th>
-                      Started
-                    </th>
-                    <th>
-                      Duration
-                    </th>
-                    <th>
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      {{vm.task.started}}
-                    </td>
-                    <td>
-                      {{vm.task.duration}}
-                    </td>
-                    <td>
-                      {{vm.task.status}}
-                    </td>
-                  </tr>
-
-                </tbody>
-              </table>
-            </div>
+            <execution-info
+              class="pull-left-xs pull-right-sm"
+              started="vm.task.started"
+              duration="vm.task.duration"
+              status="vm.task.status"></execution-info>
           </div>
         </div>
         <div class="row">
@@ -124,37 +72,11 @@
             <span class="type">{{vm.method.type|capitalize}}</span> <span class="id">{{vm.method.id}}</span>: <span class="name">{{ vm.method.name}}</span>
           </div>
           <div class="col-xs-12 col-sm-6">
-            <div class="execution">
-              <table class="pull-left-xs pull-right-sm">
-                <thead>
-                  <tr>
-                    <th>
-                      Started
-                    </th>
-                    <th>
-                      Duration
-                    </th>
-                    <th>
-                      Status
-                    </th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>
-                      {{vm.method.started}}
-                    </td>
-                    <td>
-                      {{vm.method.duration}}
-                    </td>
-                    <td>
-                      {{vm.method.status}}
-                    </td>
-                  </tr>
-
-                </tbody>
-              </table>
-            </div>
+            <execution-info
+              class="pull-left-xs pull-right-sm"
+              started="vm.method.started"
+              duration="vm.method.duration"
+              status="vm.method.status"></execution-info>
           </div>
         </div>
         <div class="row">
