@@ -139,7 +139,7 @@
         return {
           id: method.id,
           name: method.name,
-          type: method.type,
+          type: method.service === 'job' ? 'job' : 'DAG',
           service: method.service,
           status: execution.status,
           started: execution.started,
