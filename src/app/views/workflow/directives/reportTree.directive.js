@@ -5,7 +5,7 @@
     .controller('ReportTreeController', ReportTreeController);
 
   /* @ngInject */
-  function reportTree($compile, $templateCache) {
+  function reportTree($compile, $templateCache, $log, _) {
     return {
       restrict: 'E',
       scope: {
@@ -17,19 +17,14 @@
       controllerAs: 'vm',
       templateUrl: 'app/views/workflow/directives/reportTree.html',
       link: function(scope, el, attrs) {
-        scope.vm.isParent = angular.isArray(scope.vm.val.items);
-        scope.vm.delSubtree = function() {
-          if(scope.vm.parentData) {
-            scope.vm.parentData.splice(
-              scope.vm.parentData.indexOf(scope.vm.val),
-              1
-            );
-          }
-          scope.vm.val={};
-        };
+        scope.vm.isParent = _.isArray(scope.vm.val.items);
+
         el.replaceWith(
           $compile($templateCache.get('recursive.html'))(scope)
         );
+        scope.$on('$destroy', function() {
+          $log.debug('reportTree element destroyed.');
+        });
       }
     };
   }

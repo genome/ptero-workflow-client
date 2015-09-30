@@ -1,8 +1,12 @@
 <div class="workflow-view">
   <div class="row">
-    <div class="col-xs-12">
+    <div class="col-xs-6">
       <h1>Workflow</h1>
      <report-tree val="vm.data"></report-tree>
+    </div>
+    <div class="col-xs-6">
+      <pre ng-bind="vm.data|json"></pre>
+      <json-formatter json="vm.data"></json-formatter>
     </div>
   </div>
 </div>
