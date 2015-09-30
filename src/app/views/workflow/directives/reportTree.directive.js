@@ -1,6 +1,6 @@
 (function() {
   angular.module('pteroWorkflowClient.views')
-    .directive('tree', function($compile, $templateCache) {
+    .directive('reportTree', function($compile, $templateCache) {
       return {
         restrict: 'E',
         scope: {
