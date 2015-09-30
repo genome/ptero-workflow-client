@@ -1,9 +1,9 @@
 <script type="text/ng-template" id="recursive.html">
   <div class="treeNode">
-    <span>{{ val.text }}</span>
-    <button ng-click="delSubtree()">delete</button>
-    <ul ng-if="isParent" style="margin-left:30px">
-      <li ng-repeat="item in val.items">
+    <span>{{ vm.val.text }}</span>
+    <button ng-click="vm.delSubtree()">delete</button>
+    <ul ng-if="vm.isParent" style="margin-left:30px">
+      <li ng-repeat="item in vm.val.items">
         <report-tree val="item" parent-data="val.items"></report-tree>
       </li>
     </ul>
