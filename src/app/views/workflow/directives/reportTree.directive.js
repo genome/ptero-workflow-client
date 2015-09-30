@@ -17,11 +17,21 @@
       controllerAs: 'vm',
       templateUrl: 'app/views/workflow/directives/reportTree.html',
       link: function(scope, el, attrs) {
-        scope.vm.isParent = _.isArray(scope.vm.workflow.tasks);
-
-        scope.$watch(function() { return scope.vm.workflow; }, function(workflow) {
+        var vm = scope.vm,
+          template = '';
+        if(vm.entity.type === 'workflow') {
+          vm.isParent = !_.isEmpty(vm.entity.tasks);
+          template = 'workflowNode.html';
+        } else if (vm.entity.type === 'task') {
+          vm.isParent =!_.isEmpty(vm.entity.methods) || !_.isEmpty(vm.entity.tasks.executions[vm.params.color]);
+          template = 'taskNode.html';
+        } else if (vm.entity.type === 'method') {
+          vm.isParent = !_.isEmpty(vm.entity.tasks);
+          template = 'methodNode.html';
+        }
+        scope.$watch(function() { return scope.vm.entity; }, function(entity) {
           el.replaceWith(
-            $compile($templateCache.get('workflowNode.html'))(scope)
+            $compile($templateCache.get(template))(scope)
           );
         });
       }
@@ -56,6 +66,6 @@
           execution: execution
         }
       }
-    }
+    };
   }
 })();

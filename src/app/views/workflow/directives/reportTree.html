@@ -1,9 +1,9 @@
 <script type="text/ng-template" id="workflowNode.html">
   <div class="treeNode">
-    <span>Workflow: {{ vm.workflow.name}} ({{vm.workflow.id}})</span>
+    <span>Workflow: {{ vm.entity.name}} ({{vm.entity.id}})</span>
     <ul ng-if="vm.isParent" style="margin-left:30px">
-      <li ng-repeat="item in vm.val.items">
-        <report-tree val="item" parent-data="val.items"></report-tree>
+      <li ng-repeat="task in vm.entity.tasks">
+        <report-tree entity="task" params="{ color: 0, parallelBy: 0 }"></report-tree>
       </li>
     </ul>
   </div>
@@ -11,7 +11,7 @@
 
 <script type="text/ng-template" id="taskNode.html">
   <div class="treeNode">
-    <span>{{ vm.val.text }}</span>
+    <span>Task: {{ vm.entity.id}}</span>
     <ul ng-if="vm.isParent" style="margin-left:30px">
       <li ng-repeat="item in vm.val.items">
         <report-tree val="item" parent-data="val.items"></report-tree>
