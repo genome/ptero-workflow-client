@@ -1,8 +1,8 @@
 <script type="text/ng-template" id="workflowTree.html">
   <div class="treeNode">
-    <span>Workflow {{vm.workflow.id}}: {{ vm.workflow.name}}</span>
+    <span>{{vm.workflow.type|uppercase}} {{vm.workflow.id}}: {{ vm.workflow.name}}</span>
     <ul ng-if="vm.hasTasks">
-      <li ng-repeat="task in vm.workflow.tasks">
+      <li ng-repeat="task in vm.workflow.tasks|orderBy: 'topologicalIndex'">
         <report-tree entity="task" params="{ color: 0, parallelBy: 0 }"></report-tree>
       </li>
     </ul>
@@ -11,7 +11,7 @@
 
 <script type="text/ng-template" id="taskTree.html">
   <div class="treeNode">
-    <span>Task {{ vm.task.id}}: {{vm.task.name}} {{ vm.task.parallelByInfo }}</span>
+    <span>{{vm.task.type|uppercase}}: {{ vm.task.id}}: {{vm.task.name}} {{ vm.task.parallelByInfo }}</span>
     <ul ng-if="vm.relevantMethods.length > 0">
       <li ng-repeat="method in vm.relevantMethods">
         <report-tree entity="method" params="{ color: vm.params.color }"></report-tree>
@@ -27,8 +27,8 @@
 
 <script type="text/ng-template" id="methodTree.html">
   <div class="treeNode">
-    <span>{{ vm.method.name}}</span>
-    <ul ng-if="vm.isParent" style="margin-left:30px">
+    <span>{{vm.method.type|uppercase}} {{vm.method.id}}: {{ vm.method.name}}</span>
+    <ul ng-if="vm.method.tasks.length > 0">
       <li ng-repeat="task in vm.method.tasks">
         <report-tree entity="task" params="{ color: vm.params.color }"></report-tree>
       </li>

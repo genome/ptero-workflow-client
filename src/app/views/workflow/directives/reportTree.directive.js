@@ -42,25 +42,24 @@
 
   /* @ngInject */
   function ReportTreeController($log) {
-    $log.debug('ReportTreeController loaded.');
     var vm = this;
     vm.parseWorkflow = function(wf, color) {
       color = angular.isUndefined(color) ? 0 : color; // set color to 0 if unspecified
       var execution = wf.executions[color];
       if(angular.isUndefined(execution)) {
         return {
-          type: 'workflow',
           id: wf.id,
           name: wf.name,
+          type: wf.type,
           status: wf.status,
           tasks: wf.tasks
           // methods: reportOnMethods()
         }
       } else {
         return {
-          type: 'workflow',
           id: wf.id,
           name: wf.name,
+          type: wf.type,
           status: execution.status,
           timeStart: execution.timeStarted,
           duration: execution.duration,
@@ -94,9 +93,9 @@
 
       if(_.isUndefined(execution)) {
         return {
-          type: 'task',
           id: task.id,
           name: task.name,
+          type: task.type,
           parallelBy: task.parallelBy,
           parallelByInfo: parallelByInfo,
           executions: task.executions,
@@ -104,8 +103,8 @@
         };
       } else {
         return {
-          type: 'task',
           name: task.name,
+          type: task.type,
           id: task.id,
           status: execution.status,
           timeStarted: execution.timeStarted,
@@ -131,6 +130,7 @@
         return {
           id: method.id,
           name: method.name,
+          type: method.type,
           service: method.service,
           tasks: method.tasks,
           executions: method.executions
@@ -139,6 +139,7 @@
         return {
           id: method.id,
           name: method.name,
+          type: method.type,
           service: method.service,
           status: execution.status,
           started: execution.started,
@@ -149,6 +150,5 @@
         }
       }
     }
-
   }
 })();
