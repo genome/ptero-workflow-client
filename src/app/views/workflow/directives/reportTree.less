@@ -1,0 +1,33 @@
+.treeNode {
+  border-top-left-radius: 5px;
+  border-bottom-left-radius: 5px;
+  padding: 8px 0 8px 8px;
+  border-top: 1px solid #FFF;
+  border-left: 1px solid #FFF;
+  border-bottom: 1px solid #FFF;
+  margin-left: 1em;
+  &.workflow{
+    margin-left: 0 !important;
+    background-color: rgba(200,200,200,0.3);
+  }
+
+  &.task {
+    background-color: rgba(200,200,255,0.3);
+    margin-top: .5em;
+  }
+
+  &.method {
+    background-color: rgba(200,255,200,0.3);
+  }
+  ul, ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .execution {
+    padding-right: .5em;
+    font-size: small;
+  }
+
+}

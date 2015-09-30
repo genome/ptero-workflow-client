@@ -1,37 +1,88 @@
 <script type="text/ng-template" id="workflowTree.html">
-  <div class="treeNode">
-    <span>{{vm.workflow.type|uppercase}} {{vm.workflow.id}}: {{ vm.workflow.name}}</span>
-    <ul ng-if="vm.hasTasks">
-      <li ng-repeat="task in vm.workflow.tasks|orderBy: 'topologicalIndex'">
-        <report-tree entity="task" params="{ color: 0, parallelBy: 0 }"></report-tree>
-      </li>
-    </ul>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="treeNode workflow">
+        <div class="row">
+          <div class="col-xs-6">
+            <span>{{vm.workflow.type|uppercase}} {{vm.workflow.id}}: {{ vm.workflow.name}}</span>
+          </div>
+          <div class="col-xs-6">
+            <div class="execution pull-right">
+              Started: {{vm.workflow.started}}&nbsp;&nbsp;Status: {{vm.workflow.status}}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <ul ng-if="vm.hasTasks">
+              <li ng-repeat="task in vm.workflow.tasks|orderBy: 'topologicalIndex'">
+                <report-tree entity="task" params="{ color: 0, parallelBy: 0, indent: 0 }"></report-tree>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </script>
 
 <script type="text/ng-template" id="taskTree.html">
-  <div class="treeNode">
-    <span>{{vm.task.type|uppercase}}: {{ vm.task.id}}: {{vm.task.name}} {{ vm.task.parallelByInfo }}</span>
-    <ul ng-if="vm.relevantMethods.length > 0">
-      <li ng-repeat="method in vm.relevantMethods">
-        <report-tree entity="method" params="{ color: vm.params.color }"></report-tree>
-      </li>
-    </ul>
-    <ul ng-if="vm.relevantExecutionColors.length > 0">
-      <li ng-repeat="color in vm.relevantExecutionColors">
-        <report-tree entity="vm.task" params="{ color: color, parallelBy: 1 }"></report-tree>
-      </li>
-    </ul>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="treeNode task">
+        <div class="row">
+          <div class="col-xs-6">
+            <span>{{vm.task.type|uppercase}} {{ vm.task.id}}: {{vm.task.name}} {{ vm.task.parallelByInfo }}</span>
+          </div>
+          <div class="col-xs-6">
+            <div class="execution pull-right">
+              Started: {{ vm.task.started }}&nbsp;&nbsp;Status: {{vm.task.status}}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <ul ng-if="vm.relevantMethods.length > 0">
+              <li ng-repeat="method in vm.relevantMethods">
+                <report-tree entity="method" params="{ color: vm.params.color, indent: vm.params.indent+1 }"></report-tree>
+              </li>
+            </ul>
+            <ul ng-if="vm.relevantExecutionColors.length > 0">
+              <li ng-repeat="color in vm.relevantExecutionColors">
+                <report-tree entity="vm.task" params="{ color: color, parallelBy: 1, indent: vm.params.indent+1 }"></report-tree>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </script>
 
 <script type="text/ng-template" id="methodTree.html">
-  <div class="treeNode">
-    <span>{{vm.method.type|uppercase}} {{vm.method.id}}: {{ vm.method.name}}</span>
-    <ul ng-if="vm.method.tasks.length > 0">
-      <li ng-repeat="task in vm.method.tasks">
-        <report-tree entity="task" params="{ color: vm.params.color }"></report-tree>
-      </li>
-    </ul>
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="treeNode method">
+        <div class="row">
+          <div class="col-xs-6">
+            <span>{{vm.method.type|uppercase}} {{vm.method.id}}: {{ vm.method.name}}</span>
+          </div>
+          <div class="col-xs-6">
+            <div class="execution pull-right">
+              Started: {{ vm.method.started }}&nbsp;&nbsp;Status: {{vm.method.status}}
+            </div>
+          </div>
+        </div>
+        <div class="row">
+          <div class="col-xs-12">
+            <ul ng-if="vm.method.tasks.length > 0">
+              <li ng-repeat="task in vm.method.tasks">
+                <report-tree entity="task" params="{ color: vm.params.color, indent: vm.params.indent+1 }"></report-tree>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </script>
