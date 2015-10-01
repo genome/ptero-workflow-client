@@ -1,7 +1,11 @@
 <div class="workflow-view">
   <div class="row">
     <div class="col-xs-12">
-      <h1>Workflow</h1>
+      <execution-timeline executions="vm.executions" workflow="vm.workflow" params="{ indent: 0 }"></execution-timeline>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col-xs-12">
      <report-tree entity="vm.workflow" params="{ indent: 0 }"></report-tree>
     </div>
   </div>
