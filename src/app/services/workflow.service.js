@@ -26,7 +26,8 @@
         //submissionData: Reports.get({reportType: 'workflow-submission-data', workflow_id: workflowId})
       })
         .then(function(result) {
-          deferred.resolve(parseResult(result));
+          workflow = parseResult(result);
+          deferred.resolve(workflow);
         })
         .catch(function(error) {
           $log.error('Error fetching details for workflow.');
@@ -60,158 +61,156 @@
     // PRIVATE FUNCTIONS
     //////////
 
+    // Ptero::Proxy::Workflow->_concrete_workflow()
     function parseResult(result) {
-      workflow = newWorkflow(result.skeleton, result.executions);
-      workflow = registerComponents(workflow);
-      createExecutions(workflow, result.executions);
-      return workflow;
+      var wf = newWorkflow(result.skeleton);
+      createExecutions(result.executions, wf);
+      return wf;
     }
 
-    function newWorkflow(skeleton, executions) {
-      return {
-        id: skeleton.id,
-        rootTaskId: skeleton.rootTaskId,
-        name: skeleton.name,
-        status: skeleton.status,
-        started: skeleton.begins,
-        tasks: _.map(skeleton.tasks, newTask), // create root workflow tasks
-        executions: [],
-        taskIndex: [],
-        methodIndex: []
+    // Ptero::Concrete::Workflow->new()
+    function newWorkflow(sk) {
+      var wf = {
+        id: sk.id,
+        rootTaskId: sk.rootTaskId,
+        name: sk.name,
+        type: 'workflow',
+        status: sk.status,
+        methodIndex: {},
+        taskIndex: {},
+        tasks: _.map(sk.tasks, newTask),
+        executions: {}
       };
+
+      // REGISTER WORKFLOW COMPONENTS (Ptero::Concrete::Workflow->register_components()
+      // Ptero::Concrete::Workflow::Task->register_with_workflow()
+      _.each(wf.tasks, function(task) {
+        wf.taskIndex[task.id] = task;
+        registerWithWorkflow(task);
+      });
+
+      function registerWithWorkflow(component) {
+        _.each(component.tasks, registerTask);
+        _.each(component.methods, registerMethod);
+
+        function registerTask(task) {
+          task.type = 'task';
+          wf.taskIndex[task.id] = task;
+          _.each(task.methods, function(method) {
+            registerMethod(method);
+            _.each(method.tasks, registerTask);
+          });
+          return true;
+        }
+
+        function registerMethod(method) {
+          method.type = 'method';
+          wf.methodIndex[method.id] = method;
+          _.each(method.tasks, function(task) {
+            registerTask(task);
+            _.each(task.methods, registerMethod);
+          });
+          return true;
+        }
+      }
+
+      return wf;
     }
 
-    //
-    // corresponds to Ptero::Concrete::Workflow::Task->new()
-    function newTask(task, taskName, tasks) {
+    // Ptero::Concrete::Workflow::Task->new()
+    function newTask(task, name) {
       //$log.debug('--- creating Task: ' + taskName);
       //$log.debug(task);
       // get each task's methods
 
       return {
         id: task.id,
-        name: taskName,
+        name: name,
+        type: 'task',
         parallelBy: task.parallelBy,
         topologicalIndex: task.topologicalIndex,
         methods: getTaskMethods(task),
-        executions: getExecutionsWithParentColor(task, task.color)
+        executions: {}
       };
 
       function getTaskMethods(task) {
+
         var parseMethod = {
           'job': newMethod,
           'workflow': newDag,
           'workflow-block': newMethod,
           'workflow-converge': newMethod
         };
+
         return _.map(task.methods, function(method) {
           return parseMethod[method.service](method);
-        })
-      }
-
-      function getExecutionsWithParentColor(task, color) {
-        return [];
-      }
-    }
-
-    // corresponds to Ptero::Concrete::Workflow::Method->new()
-    function newMethod(method) {
-      $log.debug('----- parsing method: ' + method.name);
-      $log.debug(method);
-      return {
-        id: method.id,
-        name: method.name,
-        service: method.service,
-        serviceUrl: method.serviceUrl ? method.serviceUrl : null, // only job methods have serviceUrls
-        executions: []
-      };
-    }
-
-    function newDag(dag) {
-      $log.debug('----- parsing dag: ' + dag.name);
-      $log.debug(dag);
-      return {
-        id: dag.id,
-        name: dag.name,
-        service: dag.service,
-        executions: [],
-        tasks: _.map(dag.parameters.tasks, newTask)
-      };
-    }
-
-    //// corresponds with [Entity]->register_with_workflow()
-    //// TODO: remove if unecessary (since we're just using arrays on workflow, and they've already been generated in newTask)
-    function registerComponents(workflow) {
-      _.each(workflow.tasks, function(task) {
-        $log.debug('-------registering COMPONENTS------');
-        registerTask(task);
-      });
-
-      function registerTask(task) {
-        $log.debug('registering task :' + task.name);
-        $log.debug(task);
-        workflow.taskIndex.push(task);
-        _.each(task.methods, function(method){
-          registerMethod(method);
         });
+
+        // Ptero::Concrete::Workflow::Method->new()
+        function newMethod(method) {
+          //$log.debug('----- parsing method: ' + method.name);
+          //$log.debug(method);
+          return {
+            id: method.id,
+            name: method.name,
+            type: 'method',
+            service: method.service,
+            serviceUrl: method.serviceUrl ? method.serviceUrl : null, // only job methods have serviceUrls
+            executions: {}
+          };
+        }
+        // corresponds to Ptero::Concrete::Workflow::DAG->new()
+        function newDag(dag) {
+          //$log.debug('----- parsing dag: ' + dag.name);
+          //$log.debug(dag);
+          return {
+            id: dag.id,
+            name: dag.name,
+            type: 'dag',
+            service: dag.service,
+            tasks: _.map(dag.parameters.tasks, newTask),
+            executions: {}
+          };
+        }
       }
 
-      function registerMethod(method) {
-        $log.debug('registering method:' + method.name);
-        $log.debug(method);
-        workflow.methodIndex.push(method);
-      }
-      return workflow;
     }
 
-    function createExecutions(workflow, exec) { // corresponds to Ptero::Concrete::Workflow->create_executions()
+    function createExecutions(exec, wf) { // corresponds to Ptero::Concrete::Workflow->create_executions()
       _.each(exec.executions, function (exec, name, execs) {
         var execution = newExecution(exec, name);
         // $log.debug('------ Execution.parentType: ' + execution.parentType);
 
-        if(execution.parentId === workflow.rootTaskId && execution.parentType === 'task') {
+        if(execution.parentId === wf.rootTaskId && execution.parentType === 'task') {
           // this is a root execution so drop it into this.executions
-          workflow.executions.push(execution);
+          wf.executions[execution.color] = execution;
         } else {
+          // sub-task or method execution, find parent and assign
           var parent;
-
           if (execution.parentType === 'method') {
-            parent = _.find(workflow.methodIndex, { id: execution.parentId });
+            parent = wf.methodIndex[execution.parentId];
           } else if (execution.parentType === 'task') {
-            parent = _.find(workflow.taskIndex, { id: execution.parentId });
+            parent = wf.taskIndex[execution.parentId];
           } else {
             console.error('createExecutions() received execution with unknown parentType: ' + execution.parentType);
             return;
           }
 
-          if(parent !== undefined) {
-            $log.debug('found parent for execution');
-            $log.debug(execution);
-            parent.executions.push(execution);
-            //executions.push(execution);
+          if(!_.isUndefined(parent)) {
+            //$log.debug('found parent ' + parent.id +  ' for execution ' + execution.id);
+            //$log.debug(execution);
+            parent.executions[execution.color] = execution;
           } else {
             executions.push(execution);
           }
         }
-
-        return workflow;
-
-        //if ($execution->{parent_id} == $self->{root_task_id} && $execution->{parent_type} eq 'task') {
-        //  $self->{executions}{$execution->{color}} = $execution
-        //} else {
-        //  my $parent_index = sprintf("%s_index", $execution->{parent_type});
-        //  my $parent = $self->{$parent_index}{$execution->{parent_id}};
-        //  next unless $parent;
-        //  $parent->{executions}->{$execution->{color}} = $execution;
-        //}
-
       });
     }
 
-    function newExecution(exec, name) { // corresponds to Ptero::Concrete::Workflow::Execution->new()
+    function newExecution(exec, color) { // corresponds to Ptero::Concrete::Workflow::Execution->new()
       return {
         id: exec.id,
-        name: name,
+        type: 'execution',
         parentId: getParentId(exec),
         parentType: getParentType(exec),
         timeStarted: getTimeStarted(exec),
