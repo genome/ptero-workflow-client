@@ -30,9 +30,9 @@
       vm.viewWorkflow = function(dir) {
         if(dir === 'previous') {
           if($stateParams.workflowId -1 <=0) { return; }
-          $state.go('workflow', {workflowId: $stateParams.workflowId-1})
+          $state.go('workflow', {workflowId: Number($stateParams.workflowId) - 1})
         } else if(dir === 'next') {
-          $state.go('workflow', {workflowId: $stateParams.workflowId+1})
+          $state.go('workflow', {workflowId: Number($stateParams.workflowId) + 1})
         }
       }
 
