@@ -124,9 +124,9 @@
         , mainHeight = height - miniHeight - 50;
 
       var x = d3.time.scale()
-        .domain([d3.time.sunday(d3.min(items, function (d) {
+        .domain([d3.min(items, function (d) {
           return d.start;
-        })),
+        }),
           d3.max(items, function (d) {
             return d.end;
           })])
@@ -235,7 +235,7 @@
         .tickSize(6, 0, 0);
 
       var x1DateAxis = d3.svg.axis()
-        .scale(x1)
+        .scale(x)
         .orient('bottom')
         .ticks(d3.time.days, 1)
         .tickFormat(d3.time.format('%a %d'))
@@ -249,7 +249,7 @@
         .tickSize(15, 0, 0);
 
       var x1MonthAxis = d3.svg.axis()
-        .scale(x1)
+        .scale(x)
         .orient('top')
         .ticks(d3.time.mondays, 1)
         .tickFormat(d3.time.format('%b - Week %W'))
@@ -380,21 +380,21 @@
             return d.id;
           })
           .attr('x', function (d) {
-            return x1(d.start);
+            return x(d.start);
           })
           .attr('width', function (d) {
-            return x1(d.end) - x1(d.start);
+            return x(d.end) - x1(d.start);
           });
 
         rects.enter().append('rect')
           .attr('x', function (d) {
-            return x1(d.start);
+            return x(d.start);
           })
           .attr('y', function (d) {
             return y1(d.lane) + .1 * y1(1) + 0.5;
           })
           .attr('width', function (d) {
-            return x1(d.end) - x1(d.start);
+            return x(d.end) - x1(d.start);
           })
           .attr('height', function (d) {
             return .8 * y1(1);
