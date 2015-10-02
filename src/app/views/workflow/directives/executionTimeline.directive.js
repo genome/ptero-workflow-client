@@ -107,7 +107,7 @@
           return {
             //class: status + ' ' + parentType,
             class: parentType,
-            desc: parentId + ':' + id,
+            desc: parentType + ' ' + parentId + ':' + id,
             lane: lane,
             id: id,
             start: new Date(timeStarted),
@@ -154,8 +154,12 @@
         , miniHeight = lanes.length * 12 + 50
         , mainHeight = height - miniHeight - 50;
 
+
       var wfStart = d3.min(items, function (d) { return d.start; }),
         wfEnd = d3.max(items, function (d) { return d.end; });
+
+      var duration = moment(wfEnd).subtract(wfStart);
+
 
       var x = d3.time.scale()
         .domain([ wfStart, wfEnd ])
