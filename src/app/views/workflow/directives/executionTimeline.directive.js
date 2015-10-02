@@ -11,7 +11,7 @@
       scope: {
         workflow: '=',
         executions: '=',
-        params: '='
+        params: '=',
       },
       bindToController: true,
       controller: 'ExecutionTimelineController',
@@ -29,6 +29,7 @@
     var vm = this;
     var target = $element[0].querySelector('#timeline');
     var data = generateLanes(vm.executions);
+    var params = vm.params;
 
     $scope.$watchGroup([
       function() {return target;},
@@ -105,8 +106,8 @@
         function newItem(status, parentType, parentId, lane, id, timeStarted, timeEnded) {
           return {
             //class: status + ' ' + parentType,
-            class: 'past',
-            desc: parentType + ' ' + parentId + ':' + id,
+            class: parentType,
+            desc: parentId + ':' + id,
             lane: lane,
             id: id,
             start: new Date(timeStarted),
@@ -308,9 +309,12 @@
           .attr('x', function(d) { return x1(d.start); })
           .attr('width', function(d) { return x1(d.end) - x1(d.start); });
 
+        var rectRadius = 3;
         rects.enter().append('rect')
           .attr('x', function(d) { return x1(d.start); })
           .attr('y', function(d) { return y1(d.lane) + .1 * y1(1) + 0.5; })
+          .attr('rx', rectRadius)
+          .attr('ry', rectRadius)
           .attr('width', function(d) { return x1(d.end) - x1(d.start); })
           .attr('height', function(d) { return .8 * y1(1); })
           .attr('class', function(d) { return 'mainItem ' + d.class; });
@@ -323,9 +327,11 @@
           .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; });
 
         labels.enter().append('text')
-          .text(function (d) { return 'Item\n\n\n\n Id: ' + d.id; })
-          .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; })
-          .attr('y', function(d) { return y1(d.lane) + .5 * y1(1) + 0.5; })
+          .text(function (d) { return d.desc; })
+          .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 5; })
+          .attr('y', function(d) {
+            return y1(d.lane) + (y1(1)/2) + 5;
+          })
           .attr('text-anchor', 'start')
           .attr('class', 'itemLabel');
 

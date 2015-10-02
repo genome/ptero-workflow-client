@@ -1,50 +1,61 @@
 .executionTimeline {
   #timeline {
     width: 100%;
-    shape-rendering: crispEdges;
-  }
-  .mini text {
-    font: 9px sans-serif;
-  }
 
-  .main text {
-    font: 12px sans-serif;
-  }
+    .mini text {
+      font: 9px sans-serif;
+    }
 
-  .month text {
-    text-anchor: start;
-  }
+    .main text {
+      font: 12px sans-serif;
+    }
 
-  .todayLine {
-    stroke: blue;
-    stroke-width: 1.5;
-  }
+    .month text {
+      text-anchor: start;
+    }
 
-  //.itemLabel {
-  //  fill: ;
-  //}
+    .todayLine {
+      stroke: blue;
+      stroke-width: 1.5;
+    }
 
-  .axis line, .axis path {
-    stroke: black;
-  }
+    //.itemLabel {
+    //  fill: ;
+    //}
 
-  .miniItem {
-    stroke-width: 6;
-  }
+    .axis line,
+    .axis path {
+      stroke: grey;
+      fill: grey;
+    }
 
-  .future {
-    stroke: gray;
-    fill: #ddd;
-  }
+    .miniItem {
+      stroke-width: 6;
+    }
 
-  .past {
-    stroke: green;
-    fill: lightgreen;
-  }
+    .future {
+      stroke: gray;
+      fill: #ddd;
+    }
 
-  .brush .extent {
-    stroke: gray;
-    fill: blue;
-    fill-opacity: .165;
+    .past {
+      fill: lightgreen;
+      stroke: lightgreen;
+    }
+
+    .task {
+      fill: #D7EBF2;
+      stroke: #D7EBF2;
+    }
+
+    .method {
+      fill: #BBBEDC;
+      stroke: #BBBEDC;
+    }
+    .brush .extent {
+      stroke: gray;
+      fill: blue;
+      fill-opacity: .165;
+    }
   }
 }
