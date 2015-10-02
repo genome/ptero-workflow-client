@@ -117,8 +117,11 @@
     function renderTimeline(target, data) {
       var vm = this;
 
+      var items = data.items,
+        lanes = data.lanes;
+
       var targetWidth = target.offsetWidth;
-      var targetHeight = target.offsetHeight;
+      var targetHeight = lanes.length * 60;
 
       // helper function to create dates prior to 1000
       var yr = function(year) {
@@ -127,9 +130,6 @@
         return date;
       };
 
-      // define the chart extents
-      var items = data.items,
-        lanes = data.lanes;
 
       var margin = { top: 10, right: 0, bottom: 20, left: 0 }
         , width = targetWidth - margin.left - margin.right
