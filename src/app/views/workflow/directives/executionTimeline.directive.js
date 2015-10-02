@@ -40,29 +40,23 @@
     function generateLanes(executions){
       var lanes = [],
         items = [];
-       executions = _.sortBy(executions, function (exec) {
-         return new Date(exec.timeStarted);
-       });
+      executions = _.sortBy(executions, function (exec) {
+        return new Date(exec.timeStarted);
+      });
 
       var laneId = 0;
       _.each(executions, function (exec, index, collection) {
         if(_.isEmpty(lanes)){
-          $log.debug('Initializing lanes array.');
-          lanes.push({
-            id: laneId,
-            label: laneId,
-            firstExecutionStarted: new Date(exec.timeStarted),
-            lastExecutionEnded: new Date(exec.timeEnded)
-          });
-
-          items.push({
-            class: 'past',
-            desc: exec.parentType + ' ' + exec.parentId + ':' + exec.id,
-            lane: laneId,
-            id: index,
-            start: new Date(exec.timeStarted),
-            end: new Date(exec.timeEnded)
-          });
+          lanes.push(newLane(laneId, laneId, exec.timeStarted, exec.timeEnded));
+          items.push(newItem(
+            exec.status,
+            exec.parentType,
+            exec.parentId,
+            laneId,
+            index,
+            exec.timeStarted,
+            exec.timeEnded
+          ));
           laneId++;
         } else {
           var openLane = _.find(lanes, function (lane) {
@@ -70,41 +64,56 @@
           });
 
           if(_.isUndefined(openLane)) {
-            $log.debug('Counldn\'t find open lane for execution ' + exec.id);
-            lanes.push({
-              id: laneId,
-              label: laneId,
-              firstExecutionStarted: new Date(exec.timeStarted),
-              lastExecutionEnded: new Date(exec.timeEnded)
-            });
-            items.push({
-              class: 'past',
-              desc: exec.parentType + ' ' + exec.parentId + ':' + exec.id,
-              lane: laneId,
-              id: index,
-              start: new Date(exec.timeStarted),
-              end: new Date(exec.timeEnded)
-            });
+            lanes.push(newLane(laneId, laneId, exec.timeStarted, exec.timeEnded));
+            items.push(newItem(
+              exec.status,
+              exec.parentType,
+              exec.parentId,
+              laneId,
+              index,
+              exec.timeStarted,
+              exec.timeEnded
+            ));
             laneId++;
           } else {
-            $log.debug('Lane ' + openLane.lane + ' open for execution ' + exec.id);
-            items.push({
-              class: 'past',
-              desc: exec.parentType + ' ' + exec.parentId + ':' + exec.id,
-              lane: openLane.id,
-              id: index,
-              start: new Date(exec.timeStarted),
-              end: new Date(exec.timeEnded)
-            });
+            items.push(newItem(
+              exec.status,
+              exec.parentType,
+              exec.parentId,
+              openLane.id,
+              index,
+              exec.timeStarted,
+              exec.timeEnded
+            ));
             openLane.lastExecutionEnded = new Date(exec.timeEnded);
           }
         }
 
         function isBetween(time, start, end) {
-          $log.debug(time + ' between ' + start + ' and ' + end + '?');
-          $log.debug(moment(time).isBetween(start, end));
           return moment(time).isBetween(start, end);
         }
+
+        function newLane(id, label, timeStarted, timeEnded) {
+          return {
+            id: id,
+            label: label,
+            firstExecutionStarted: new Date(timeStarted),
+            lastExecutionEnded: new Date(timeEnded)
+          }
+        }
+
+        function newItem(status, parentType, parentId, lane, id, timeStarted, timeEnded) {
+          return {
+            //class: status + ' ' + parentType,
+            class: 'past',
+            desc: parentType + ' ' + parentId + ':' + id,
+            lane: lane,
+            id: id,
+            start: new Date(timeStarted),
+            end: new Date(timeEnded)
+          }
+        }
+
       });
 
       return {
@@ -121,7 +130,14 @@
         lanes = data.lanes;
 
       var targetWidth = target.offsetWidth;
-      var targetHeight = lanes.length * 60;
+      var targetHeight;
+      if(lanes.length < 5 ) {
+        targetHeight = 300;
+      } else if (5 <= lanes.length < 15) {
+        targetHeight = lanes.length * 60;
+      } else if (lanes.length >= 15) {
+        targetHeight = lanes.length * 45;
+      }
 
       // helper function to create dates prior to 1000
       var yr = function(year) {
@@ -309,7 +325,7 @@
         labels.enter().append('text')
           .text(function (d) { return 'Item\n\n\n\n Id: ' + d.id; })
           .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; })
-          .attr('y', function(d) { return y1(d.lane) + .4 * y1(1) + 0.5; })
+          .attr('y', function(d) { return y1(d.lane) + .5 * y1(1) + 0.5; })
           .attr('text-anchor', 'start')
           .attr('class', 'itemLabel');
 
