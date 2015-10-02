@@ -137,17 +137,20 @@
         , miniHeight = lanes.length * 12 + 50
         , mainHeight = height - miniHeight - 50;
 
+      var wfStart = d3.min(items, function (d) { return d.start; }),
+        wfEnd = d3.max(items, function (d) { return d.end; });
+
       var x = d3.time.scale()
-        .domain([
-          d3.min(items, function (d) { return d.start; }),
-          d3.max(items, function (d) { return d.end; })
-        ])
+        .domain([ wfStart, wfEnd ])
         .range([0, width]);
 
       var x1 = d3.time.scale().range([0, width]);
       var ext = d3.extent(lanes, function(d) { return d.id; });
       var y1 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, mainHeight]);
       var y2 = d3.scale.linear().domain([ext[0], ext[1] + 1]).range([0, miniHeight]);
+
+      // delete existing elements
+      d3.select(target).selectAll("*").remove();
 
       var chart = d3.select(target)
         .append('svg:svg')

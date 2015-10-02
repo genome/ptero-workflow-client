@@ -13,40 +13,5 @@
 
     vm.workflow = workflow;
     vm.executions = executions;
-    vm.data = {
-      text: 'Primates',
-      items: [
-        {
-          text: 'Anthropoidea',
-          items: [
-            {
-              text: 'New World Anthropoids'
-            },
-            {
-              text: 'Old World Anthropoids',
-              items: [
-                {
-                  text: 'Apes',
-                  items: [
-                    {
-                      text: 'Lesser Apes'
-                    },
-                    {
-                      text: 'Greater Apes'
-                    }
-                  ]
-                },
-                {
-                  text: 'Monkeys'
-                }
-              ]
-            }
-          ]
-        },
-        {
-          text: 'Prosimii'
-        }
-      ]
-    };
   }
 })();

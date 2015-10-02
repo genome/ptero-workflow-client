@@ -177,6 +177,8 @@
     }
 
     function createExecutions(exec, wf) { // corresponds to Ptero::Concrete::Workflow->create_executions()
+
+      angular.copy([], executions);
       _.each(exec.executions, function (exec, name, execs) {
         var execution = newExecution(exec, name);
         // $log.debug('------ Execution.parentType: ' + execution.parentType);
@@ -184,6 +186,7 @@
         if(execution.parentId === wf.rootTaskId && execution.parentType === 'task') {
           // this is a root execution so drop it into this.executions
           wf.executions[execution.color] = execution;
+          executions.push(execution);
         } else {
           // sub-task or method execution, find parent and assign
           var parent;
@@ -200,9 +203,8 @@
             //$log.debug('found parent ' + parent.id +  ' for execution ' + execution.id);
             //$log.debug(execution);
             parent.executions[execution.color] = execution;
-          } else {
-            executions.push(execution);
           }
+          executions.push(execution);
         }
       });
     }
