@@ -1,21 +1,67 @@
+@import '_workflow-colors.less';
+
 .executionInfo {
-  padding-right: .5em;
+  padding: .2em;
+  background-color: rgba(150, 150,150, .2);
+  border-radius: 5px;
+  margin-right: .5em;
+  margin-bottom: .3em;
 
   table {
     max-width: 300px;
     border-spacing: 0;
     border-collapse: collapse;
-    th:nth-child(n+2), td:nth-child(n+2) {
-      padding-left: 2em;
-    }
-    th {
-      font-weight: bold;
+
+    .exec-label {
       font-size: smaller;
-      color: #666;
-    }
-    td {
-      font-size: small;
+      font-weight: bold;
+      line-height: 20px;
       color: #333;
+      text-align: right;
+      padding-left: 15px;
+    }
+
+    .exec-value {
+      font-size: smaller;
+      white-space: nowrap;
+      line-height: 20px;
+      color: #333;
+      text-align: left;
+      padding-left: 8px;
+    }
+
+    .exec-status {
+      font-size: smaller;
+      padding-left: 10px;
+    }
+
+    .status-badge {
+      font-size: smaller;
+      font-weight: bold;
+      margin: 3px;
+      line-height: 20px;
+      padding: 0 5px;
+      border-radius: 5px;
+
+      &.succeeded {
+        background-color: @succeededStroke;
+        color: lighten(@succeededFill, 30%);
+      }
+
+      &.errored {
+        background-color: @erroredStroke;
+        color: lighten(@erroredFill, 30%);
+      }
+
+      &.failed {
+        background-color: @failedStroke;
+        color: lighten(@failedFill, 30%);
+      }
+
+      &.cancelled {
+        background-color: @cancelledStroke;
+        color: lighten(@cancelledFill, 30%);
+      }
     }
   }
 }

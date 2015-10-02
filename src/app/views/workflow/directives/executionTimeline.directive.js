@@ -322,13 +322,19 @@
         rects.exit().remove();
 
         // update the item labels
-        labels = itemRects.selectAll('text')
+        labels = itemRects
+          .selectAll('text')
           .data(visItems, function (d) { return d.id; })
           .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 2; });
 
-        labels.enter().append('text')
+        labels
+          .enter()
+          .append('text')
+          .filter(function(d,i) {
+            return x1(d.end) - x1(d.start) > 50;
+          })
           .text(function (d) { return d.desc; })
-          .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 5; })
+          .attr('x', function(d) { return x1(Math.max(d.start, minExtent)) + 10; })
           .attr('y', function(d) {
             return y1(d.lane) + (y1(1)/2) + 5;
           })

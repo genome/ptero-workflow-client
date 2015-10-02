@@ -1,29 +1,25 @@
 <div class="executionInfo">
   <table>
-    <thead>
-      <tr>
-        <th class="started">
-          Started
-        </th>
-        <th class="duration">
-          Duration
-        </th>
-        <th rowspan="2" class="status">
-          {{vm.status}}
-        </th>
-      </tr>
-    </thead>
     <tbody>
       <tr>
-        <td class="started">
+        <td class="exec-label">
+          Started:
+        </td>
+        <td class="exec-value">
           <span am-time-ago="vm.started">time ago</span>
         </td>
-        <td class="duration">
+        <td class="exec-label">
+          Duration:
+        </td>
+        <td class="exec-value">
           <span ng-bind="vm.duration | amDurationFormat: 'milliseconds'">duration</span>
         </td>
-        <td class="status"></td>
+        <td class="exec-status">
+          <div class="status-badge" ng-class="vm.status">
+            {{vm.status}}
+          </div>
+        </td>
       </tr>
-
     </tbody>
   </table>
 </div>
