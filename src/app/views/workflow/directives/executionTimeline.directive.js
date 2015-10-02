@@ -25,7 +25,7 @@
   }
 
   /* @ngInject */
-  function ExecutionTimelineController($scope, $element, moment, d3) {
+  function ExecutionTimelineController($log, $scope, $element, moment, d3) {
     var vm = this;
     var target = $element[0].querySelector('#timeline');
     var data = generateLanes(vm.executions);
@@ -43,9 +43,11 @@
        executions = _.sortBy(executions, function (exec) {
          return new Date(exec.timeStarted);
        });
+
       var laneId = 0;
       _.each(executions, function (exec, index, collection) {
         if(_.isEmpty(lanes)){
+          $log.debug('Initializing lanes array.');
           lanes.push({
             id: laneId,
             label: laneId,
@@ -64,10 +66,11 @@
           laneId++;
         } else {
           var openLane = _.find(lanes, function (lane) {
-            return isBetween(exec.timeStarted, lane.firstExecutionStarted, lane.lastExecutionEnded);
+            return !isBetween(exec.timeStarted, lane.firstExecutionStarted, lane.lastExecutionEnded);
           });
 
           if(_.isUndefined(openLane)) {
+            $log.debug('Counldn\'t find open lane for execution ' + exec.id);
             lanes.push({
               id: laneId,
               label: laneId,
@@ -84,6 +87,7 @@
             });
             laneId++;
           } else {
+            $log.debug('Lane ' + openLane.lane + ' open for execution ' + exec.id);
             items.push({
               class: 'past',
               desc: exec.parentType + ' ' + exec.parentId + ':' + exec.id,
@@ -92,15 +96,15 @@
               start: new Date(exec.timeStarted),
               end: new Date(exec.timeEnded)
             });
-
             openLane.lastExecutionEnded = new Date(exec.timeEnded);
           }
         }
 
         function isBetween(time, start, end) {
+          $log.debug(time + ' between ' + start + ' and ' + end + '?');
+          $log.debug(moment(time).isBetween(start, end));
           return moment(time).isBetween(start, end);
         }
-
       });
 
       return {
@@ -109,9 +113,12 @@
       };
     }
 
+    // adapted from http://bl.ocks.org/bunkat/3127459
     function renderTimeline(target, data) {
       var vm = this;
-      var target = $element[0].querySelector('#timeline');
+
+      var targetWidth = target.offsetWidth;
+      var targetHeight = target.offsetHeight;
 
       // helper function to create dates prior to 1000
       var yr = function(year) {
@@ -124,9 +131,9 @@
       var items = data.items,
         lanes = data.lanes;
 
-      var margin = {top: 20, right: 15, bottom: 15, left: 70}
-        , width = 960 - margin.left - margin.right
-        , height = 500 - margin.top - margin.bottom
+      var margin = { top: 10, right: 0, bottom: 20, left: 0 }
+        , width = targetWidth - margin.left - margin.right
+        , height = targetHeight - margin.top - margin.bottom
         , miniHeight = lanes.length * 12 + 50
         , mainHeight = height - miniHeight - 50;
 
@@ -276,7 +283,7 @@
         // update the axis
         main.select('.main.axis.date').call(x1DateAxis);
 
-        // upate the item rects
+        // update the item rects
         rects = itemRects.selectAll('rect')
           .data(visItems, function (d) { return d.id; })
           .attr('x', function(d) { return x1(d.start); })
